@@ -7,7 +7,7 @@ import PaymentModal from '../components/PaymentModal';
 
 const Cart = () => {
     const [showAddress, setShowAddress] = useState(false);
-    const { products, currency, cartItems, setCartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount } = useAppContext();
+    const { products, currency, cartItems, setCartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, decrementStock } = useAppContext();
 
     const [cartArray, setCartArray] = useState([]);
     const [addressList, setAddressList] = useState(dummyAddress);
@@ -18,25 +18,44 @@ const Cart = () => {
 
     useEffect(() => {
         const fetchAddresses = async () => {
+            const isGreatStack = (a) =>
+                !a ||
+                (typeof a.firstName === 'string' && a.firstName.toLowerCase().includes('great')) ||
+                (typeof a.lastName === 'string' && a.lastName.toLowerCase().includes('stack')) ||
+                (typeof a.street === 'string' && a.street.includes('Street 123')) ||
+                (typeof a.email === 'string' && a.email.toLowerCase().includes('greatstack'));
+
             try {
                 const res = await addressApi.getAddresses().catch(() => null);
                 const localSavedRaw = localStorage.getItem('greencart_saved_addresses');
                 let localSaved = localSavedRaw ? JSON.parse(localSavedRaw) : [];
 
                 // Filter out any stale references to "Great Stack"
-                localSaved = localSaved.filter(
-                    (a) => !(a.firstName === 'Great' && a.lastName === 'Stack') && a.email !== 'user.greatstack@gmail.com'
-                );
+                localSaved = localSaved.filter((a) => !isGreatStack(a));
                 localStorage.setItem('greencart_saved_addresses', JSON.stringify(localSaved));
 
-                let combined = [];
+                let apiAddresses = [];
+                if (res && res.success && Array.isArray(res.addresses)) {
+                    apiAddresses = res.addresses.filter((a) => !isGreatStack(a));
+                }
 
-                if (res && res.success && Array.isArray(res.addresses) && res.addresses.length > 0) {
-                    combined = [...res.addresses, ...localSaved];
-                } else if (localSaved.length > 0) {
-                    combined = [...localSaved, ...dummyAddress];
-                } else {
-                    combined = dummyAddress;
+                const cleanDummy = dummyAddress.filter((a) => !isGreatStack(a));
+                let combined = [...apiAddresses, ...localSaved, ...cleanDummy];
+
+                if (combined.length === 0) {
+                    combined = [{
+                        _id: "addr_default_1",
+                        firstName: "Rameshwar",
+                        lastName: "Mane",
+                        email: "rameshwar@harvesto.com",
+                        street: "Green Park Avenue, Flat 402",
+                        city: "Mumbai",
+                        state: "Maharashtra",
+                        zipCode: "400001",
+                        zipcode: "400001",
+                        country: "India",
+                        phone: "+91 98765 43210"
+                    }];
                 }
 
                 // Ensure all addresses have zipCode
@@ -51,8 +70,9 @@ const Cart = () => {
                     setSelectedAddress(combined[0]);
                 }
             } catch {
-                setAddressList(dummyAddress);
-                setSelectedAddress(dummyAddress[0]);
+                const cleanDummy = dummyAddress.filter((a) => !isGreatStack(a));
+                setAddressList(cleanDummy);
+                setSelectedAddress(cleanDummy[0]);
             }
         };
 
@@ -117,11 +137,13 @@ const Cart = () => {
             };
 
             await orderApi.create(orderData).catch(() => null);
+            decrementStock(cartArray);
             toast.success(isPaid ? "Payment successful! Order confirmed with Harvesto." : "Order placed successfully with Harvesto!");
             setCartItems({});
             navigate('/my-orders');
         } catch (error) {
             console.error("Order placement error:", error);
+            decrementStock(cartArray);
             setCartItems({});
             toast.success("Order placed successfully!");
             navigate('/my-orders');

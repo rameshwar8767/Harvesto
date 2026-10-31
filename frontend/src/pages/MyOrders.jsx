@@ -203,7 +203,17 @@ const MyOrders = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400">📍 Delivering to:</span>
                     <span className="font-semibold text-slate-700">
-                      {order.address.firstName === 'Great' ? 'Rameshwar Mane' : `${order.address.firstName} ${order.address.lastName}`} — {order.address.street === 'Street 123' ? 'Green Park Avenue, Flat 402' : order.address.street}, {order.address.city === 'Main City' ? 'Mumbai' : order.address.city}
+                      {((addr) => {
+                        if (!addr) return 'Rameshwar Mane — Green Park Avenue, Flat 402, Mumbai';
+                        const isGS = (addr.firstName && String(addr.firstName).toLowerCase().includes('great')) ||
+                                     (addr.lastName && String(addr.lastName).toLowerCase().includes('stack')) ||
+                                     (addr.street && String(addr.street).includes('Street 123'));
+                        if (isGS) return 'Rameshwar Mane — Green Park Avenue, Flat 402, Mumbai';
+                        const name = `${addr.firstName || ''} ${addr.lastName || ''}`.trim() || 'Rameshwar Mane';
+                        const street = addr.street || 'Green Park Avenue, Flat 402';
+                        const city = addr.city || 'Mumbai';
+                        return `${name} — ${street}, ${city}`;
+                      })(order.address)}
                     </span>
                   </div>
                   <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
