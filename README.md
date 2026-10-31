@@ -70,7 +70,7 @@ graph TD
 ## 📂 Folder Structure
 
 ```
-GreenCart/
+Harvesto/
 ├── backend/
 │   ├── configs/
 │   │   ├── db.js                 # MongoDB connection logic
