@@ -12,3 +12,4 @@ apiRouter.use('/product', productRouter);
 apiRouter.use('/order', orderRouter);
 
 export default apiRouter;
+

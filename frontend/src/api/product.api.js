@@ -16,3 +16,4 @@ export const productApi = {
 };
 
 export default productApi;
+
