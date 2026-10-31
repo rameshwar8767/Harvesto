@@ -246,3 +246,4 @@ const PaymentModal = ({ isOpen, onClose, totalAmount, currency, onPaymentSuccess
 };
 
 export default PaymentModal;
+
