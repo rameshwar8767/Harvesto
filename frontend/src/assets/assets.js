@@ -188,6 +188,59 @@ export const categories = [
   },
 ];
 
+export const footerLinks = [
+  {
+    title: "Quick Links",
+    links: [
+      { text: "Home", url: "/" },
+      { text: "All Groceries", url: "/products" },
+      { text: "Best Sellers", url: "/products" },
+      { text: "Track Order", url: "/my-orders" },
+    ],
+  },
+  {
+    title: "Customer Support",
+    links: [
+      { text: "Delivery Information", url: "#" },
+      { text: "Return & Refund Policy", url: "#" },
+      { text: "Payment Methods", url: "#" },
+      { text: "Contact Us", url: "#" },
+    ],
+  },
+  {
+    title: "Connect with Harvesto",
+    links: [
+      { text: "Instagram", url: "#" },
+      { text: "Twitter", url: "#" },
+      { text: "Facebook", url: "#" },
+      { text: "YouTube", url: "#" },
+    ],
+  },
+];
+
+export const features = [
+  {
+    icon: delivery_truck_icon,
+    title: "15-Min Delivery",
+    description: "Farm-fresh groceries delivered rapidly to your kitchen.",
+  },
+  {
+    icon: leaf_icon,
+    title: "100% Organic",
+    description: "Certified pesticide-free produce from regional farms.",
+  },
+  {
+    icon: coin_icon,
+    title: "Unbeatable Deals",
+    description: "High quality daily staples at direct-from-farm rates.",
+  },
+  {
+    icon: trust_icon,
+    title: "Neighborhood Trust",
+    description: "Loved and relied upon by 10,000+ happy households.",
+  },
+];
+
 export const dummyProducts = [
   // --- VEGETABLES ---
   {
@@ -485,6 +538,40 @@ export const dummyProducts = [
     createdAt: "2026-10-31T08:00:00.000Z",
     updatedAt: "2026-10-31T09:30:00.000Z",
   },
+  {
+    _id: "dr04r28k",
+    name: "Pepsi Refreshing Cola 750ml",
+    category: "Drinks",
+    price: 45,
+    offerPrice: 40,
+    stock: 35,
+    inStock: true,
+    image: [pepsi_image],
+    description: [
+      "Bold, refreshing and bubbly signature cola taste",
+      "Best enjoyed chilled for maximum refreshment",
+      "Great accompaniment for meals and gatherings",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "dr05s29l",
+    name: "7-Up Crisp Lemonade 750ml",
+    category: "Drinks",
+    price: 45,
+    offerPrice: 40,
+    stock: 25,
+    inStock: true,
+    image: [seven_up_image_1],
+    description: [
+      "Clear, bubbly and uplifting natural lemon-lime flavor",
+      "Caffeine-free instant thirst quencher",
+      "Authentic refreshing citrus taste",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
 
   // --- BAKERY ---
   {
@@ -591,6 +678,40 @@ export const dummyProducts = [
     createdAt: "2026-10-31T08:00:00.000Z",
     updatedAt: "2026-10-31T09:30:00.000Z",
   },
+  {
+    _id: "gr04x34e",
+    name: "Himalayan Organic Brown Rice 1kg",
+    category: "Grains",
+    price: 135,
+    offerPrice: 119,
+    stock: 25,
+    inStock: true,
+    image: [brown_rice_image],
+    description: [
+      "Unpolished high-fiber brown rice with intact bran layer",
+      "Rich in manganese, magnesium, and essential nutrients",
+      "Nutty flavor and chewy whole-grain texture",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "gr05y35f",
+    name: "Whole Grain Pearl Barley 500g",
+    category: "Grains",
+    price: 85,
+    offerPrice: 72,
+    stock: 20,
+    inStock: true,
+    image: [barley_image],
+    description: [
+      "Nutrient-dense ancient cereal grain rich in soluble fiber",
+      "Great for hearty soups, wholesome salads, and porridge",
+      "Supports healthy digestion and active lifestyle",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
 
   // --- INSTANT & PACKAGED FOOD ---
   {
@@ -606,6 +727,74 @@ export const dummyProducts = [
       "India's beloved iconic instant snack with authentic spice blend",
       "Quick and easy preparation in under 2 minutes",
       "Fortified with iron and quality roasted spices",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "in01b35d",
+    name: "Top Ramen Curry Instant Noodles 280g",
+    category: "Instant",
+    price: 55,
+    offerPrice: 48,
+    stock: 35,
+    inStock: true,
+    image: [top_ramen_image],
+    description: [
+      "Curry smacking noodles with flat noodles shape for rich gravy hold",
+      "Spicy and savory Asian-style broth flavor",
+      "Perfect quick snack for anytime cravings",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "in01c36e",
+    name: "Knorr Sweet Corn Veg Soup 43g",
+    category: "Instant",
+    price: 35,
+    offerPrice: 30,
+    stock: 40,
+    inStock: true,
+    image: [knorr_soup_image],
+    description: [
+      "Restaurant-quality warm and thick sweet corn vegetable soup",
+      "Made with 100% real vegetables and zero preservatives",
+      "Ready in just 3 quick minutes with hot water",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "in01d37f",
+    name: "Sunfeast Yippee Magic Masala 260g",
+    category: "Instant",
+    price: 50,
+    offerPrice: 44,
+    stock: 30,
+    inStock: true,
+    image: [yippee_image],
+    description: [
+      "Round block non-sticky noodles made without artificial flavors",
+      "Packed with goodness of wheat and colorful dehydrated veggies",
+      "Long slurpy noodles children adore",
+    ],
+    createdAt: "2026-10-31T08:00:00.000Z",
+    updatedAt: "2026-10-31T09:30:00.000Z",
+  },
+  {
+    _id: "in01e38g",
+    name: "Maggi Nutri-licious Oats Noodles 72g",
+    category: "Instant",
+    price: 40,
+    offerPrice: 35,
+    stock: 25,
+    inStock: true,
+    image: [maggi_oats_image],
+    description: [
+      "Wholesome noodles made with the goodness of oats and wheat",
+      "High fiber content with aromatic herbs and savory seasoning",
+      "Guilt-free snack for mindful eaters",
     ],
     createdAt: "2026-10-31T08:00:00.000Z",
     updatedAt: "2026-10-31T09:30:00.000Z",
