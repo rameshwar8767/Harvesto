@@ -3,7 +3,7 @@ import Product from "../models/product.model.js";
 
 // Add Product : POST /api/product/add
 export const addProduct = asyncHandler(async (req, res) => {
-    const { name, price, offerPrice, description, category, inStock, image } = req.body;
+    const { name, price, offerPrice, description, category, inStock, stock, image } = req.body;
 
     if (!name || price === undefined || offerPrice === undefined || !category) {
         return res.status(400).json({
@@ -19,6 +19,7 @@ export const addProduct = asyncHandler(async (req, res) => {
         : [];
 
     const imageArray = Array.isArray(image) ? image : image ? [image] : [];
+    const stockQty = stock !== undefined ? Number(stock) : 25;
 
     const product = await Product.create({
         name,
@@ -27,7 +28,8 @@ export const addProduct = asyncHandler(async (req, res) => {
         description: descArray,
         category: category.toLowerCase(),
         image: imageArray,
-        inStock: inStock !== undefined ? Boolean(inStock) : true,
+        stock: stockQty,
+        inStock: inStock !== undefined ? Boolean(inStock) : stockQty > 0,
     });
 
     return res.status(201).json({
@@ -85,6 +87,14 @@ export const updateProduct = asyncHandler(async (req, res) => {
     if (updateData.price !== undefined) updateData.price = Number(updateData.price);
     if (updateData.offerPrice !== undefined) updateData.offerPrice = Number(updateData.offerPrice);
     if (updateData.category) updateData.category = updateData.category.toLowerCase();
+    if (updateData.stock !== undefined) {
+        updateData.stock = Number(updateData.stock);
+        if (updateData.stock <= 0) {
+            updateData.inStock = false;
+        } else if (updateData.inStock === undefined) {
+            updateData.inStock = true;
+        }
+    }
 
     const product = await Product.findByIdAndUpdate(id, updateData, { new: true });
 

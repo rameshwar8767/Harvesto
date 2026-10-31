@@ -82,6 +82,22 @@ export const placeOrder = asyncHandler(async (req, res) => {
         status: "Order Placed",
     });
 
+    // Automatically decrement stock for each ordered item
+    for (const item of normalizedItems) {
+        if (mongoose.isValidObjectId(item.product)) {
+            const prod = await Product.findById(item.product).catch(() => null);
+            if (prod) {
+                const currentStock = prod.stock !== undefined ? prod.stock : 25;
+                const newStock = Math.max(0, currentStock - item.quantity);
+                prod.stock = newStock;
+                if (newStock <= 0) {
+                    prod.inStock = false;
+                }
+                await prod.save().catch(() => null);
+            }
+        }
+    }
+
     // Clear user cart if userId is a valid MongoDB ObjectId
     if (userId && mongoose.isValidObjectId(userId)) {
         await User.findByIdAndUpdate(userId, { cartItems: {} }).catch(() => null);

@@ -61,7 +61,19 @@ export const AppContextProvider = ({ children }) => {
 
     const addToCart = (itemId) => {
         if (!itemId) return;
+        const targetProduct = products.find((p) => p._id === itemId);
+        if (targetProduct && (targetProduct.inStock === false || (targetProduct.stock !== undefined && targetProduct.stock <= 0))) {
+            toast.error("Sorry, this item is out of stock!");
+            return;
+        }
+
         const cartData = structuredClone(cartItems);
+        const currentQty = cartData[itemId] || 0;
+        if (targetProduct && targetProduct.stock !== undefined && currentQty >= targetProduct.stock) {
+            toast.error(`Only ${targetProduct.stock} unit(s) available in stock!`);
+            return;
+        }
+
         if (cartData[itemId]) {
             cartData[itemId] += 1;
         } else {
@@ -69,6 +81,27 @@ export const AppContextProvider = ({ children }) => {
         }
         setCartItems(cartData);
         toast.success("Added to cart");
+    };
+
+    const decrementStock = (orderedItems) => {
+        if (!Array.isArray(orderedItems)) return;
+        setProducts((prev) =>
+            prev.map((prod) => {
+                const match = orderedItems.find(
+                    (item) => item.product === prod._id || item._id === prod._id
+                );
+                if (match) {
+                    const currentStock = prod.stock !== undefined ? prod.stock : 25;
+                    const newStock = Math.max(0, currentStock - (match.quantity || 1));
+                    return {
+                        ...prod,
+                        stock: newStock,
+                        inStock: newStock > 0,
+                    };
+                }
+                return prod;
+            })
+        );
     };
 
     const updateCartItem = (itemId, quantity) => {
