@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { dummyOrders } from '../assets/assets';
 import { orderApi } from '../api';
+import { Link } from 'react-router-dom';
 
 const MyOrders = () => {
   const [myOrders, setMyOrders] = useState([]);
@@ -25,51 +26,85 @@ const MyOrders = () => {
   }, []);
 
   return (
-    <div className='mt-12 pb-16'>
-      <div className='flex flex-col items-start w-max mb-8'>
-        <p className='text-2xl font-semibold uppercase text-gray-800'>My Orders</p>
-        <div className='w-16 h-1 bg-primary rounded-full mt-1.5'></div>
+    <div className='mt-8 mb-20 max-w-4xl mx-auto'>
+      <div className='flex items-center justify-between mb-8 pb-4 border-b border-slate-200/80'>
+        <div>
+          <h1 className='text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight'>
+            My Orders
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Track and manage your recent farm grocery deliveries.
+          </p>
+        </div>
+        <Link to="/products" className="text-xs font-bold text-primary hover:underline">
+          Shop More →
+        </Link>
       </div>
 
       {myOrders.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <p className="text-lg">No orders placed yet.</p>
+        <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 p-8">
+          <span className="text-5xl mb-4 block">📦</span>
+          <h3 className="text-xl font-bold text-slate-800">No Orders Yet</h3>
+          <p className="text-slate-500 text-sm mt-1 max-w-sm mx-auto">
+            You haven't placed any orders with Harvesto yet. Start exploring fresh vegetables and fruits today!
+          </p>
+          <Link to="/products" className="inline-block mt-6 px-6 py-2.5 bg-primary text-white font-bold text-xs rounded-full shadow-sm hover:bg-primary-dull transition">
+            Start Shopping
+          </Link>
         </div>
       ) : (
-        myOrders.map((order, index) => (
-          <div key={order._id || index} className='border border-gray-200 rounded-lg mb-8 p-5 max-w-4xl bg-white shadow-sm'>
-            <div className='flex justify-between md:items-center text-gray-500 text-sm font-medium pb-4 border-b border-gray-100 max-md:flex-col gap-1'>
-              <span>Order ID: <strong className="text-gray-700">{order._id}</strong></span>
-              <span>Payment: <strong className="text-gray-700">{order.paymentMethod}</strong></span>
-              <span>Total: <strong className="text-primary text-base">{currency}{order.amount}</strong></span>
-            </div>
-            {order.items.map((item, itemIdx) => (
-              <div 
-                key={itemIdx} 
-                className={`relative bg-white text-gray-600 ${order.items.length !== itemIdx + 1 ? "border-b border-gray-100" : ""} flex flex-col md:flex-row md:items-center justify-between py-4 md:gap-16 w-full`}
-              >
-                <div className='flex items-center mb-3 md:mb-0'>
-                  <div className='bg-gray-50 p-2 rounded-lg border border-gray-200 shrink-0'>
-                    <img src={item.product?.image?.[0]} className='w-14 h-14 object-contain' alt={item.product?.name} />
-                  </div>
-                  <div className='ml-4'>
-                    <h2 className='text-base font-semibold text-gray-800'>{item.product?.name}</h2>
-                    <p className='text-xs text-gray-500 capitalize'>Category: {item.product?.category}</p>
-                  </div>
+        <div className="space-y-6">
+          {myOrders.map((order, index) => (
+            <div key={order._id || index} className='border border-slate-200/80 rounded-2xl p-5 sm:p-6 bg-white shadow-xs hover:shadow-card transition'>
+              {/* Top Meta Bar */}
+              <div className='flex flex-wrap items-center justify-between text-xs pb-4 border-b border-slate-100 gap-3'>
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-slate-800">
+                    Order #{order._id?.slice(-8) || `HVT-${index + 1}`}
+                  </span>
+                  <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                    {order.status || "Order Placed"}
+                  </span>
                 </div>
-
-                <div className='flex flex-col justify-center text-sm md:ml-8 mb-3 md:mb-0'>
-                  <p>Quantity: <span className="font-semibold text-gray-800">{item.quantity || 1}</span></p>
-                  <p>Status: <span className="text-emerald-600 font-medium">{item.status || "Order Placed"}</span></p>
-                  <p className="text-xs text-gray-400">Date: {new Date(order.createdAt || Date.now()).toLocaleDateString()}</p>
+                
+                <div className="flex items-center gap-4 text-slate-500 font-medium">
+                  <span>Method: <strong className="text-slate-700">{order.paymentMethod || "COD"}</strong></span>
+                  <span>Total: <strong className="text-primary font-extrabold text-sm">{currency}{order.amount}</strong></span>
                 </div>
-                <p className='text-primary text-base font-semibold'>
-                  {currency}{((item.product?.offerPrice || 0) * (item.quantity || 1))}
-                </p>
               </div>
-            ))}
-          </div>
-        ))
+
+              {/* Items List */}
+              <div className="divide-y divide-slate-100 mt-2">
+                {order.items.map((item, itemIdx) => (
+                  <div 
+                    key={itemIdx} 
+                    className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 gap-4"
+                  >
+                    <div className='flex items-center gap-3.5'>
+                      <div className='bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0 w-14 h-14 flex items-center justify-center'>
+                        <img src={item.product?.image?.[0]} className='max-h-full max-w-full object-contain' alt={item.product?.name} />
+                      </div>
+                      <div>
+                        <h4 className='text-sm font-bold text-slate-800'>{item.product?.name || "Grocery Item"}</h4>
+                        <p className='text-xs text-slate-400 capitalize'>{item.product?.category}</p>
+                        <p className="text-xs text-slate-500 mt-0.5 font-medium">Qty: {item.quantity || 1}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-slate-500">
+                      <p className="text-slate-400">
+                        {new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <p className='text-slate-900 font-bold text-sm sm:text-base'>
+                        {currency}{((item.product?.offerPrice || 0) * (item.quantity || 1))}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
