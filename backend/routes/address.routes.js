@@ -13,3 +13,4 @@ addressRouter.get('/list', authUser, getUserAddresses);
 addressRouter.delete('/:id', authUser, deleteAddress);
 
 export default addressRouter;
+
