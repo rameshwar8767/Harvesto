@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { assets, categories } from '../../assets/assets';
 import { useAppContext } from '../../context/AppContext';
 import { toast } from 'react-hot-toast';
+import { productApi } from '../../api';
 
 const AddProduct = () => {
-    const { backendUrl, products, setProducts, navigate } = useAppContext();
+    const { products, setProducts, navigate } = useAppContext();
 
     const [files, setFiles] = useState([]);
     const [name, setName] = useState("");
@@ -30,13 +31,7 @@ const AddProduct = () => {
         };
 
         try {
-            const res = await fetch(`${backendUrl}/api/product/add`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify(newProduct),
-            });
-            const data = await res.json();
+            const data = await productApi.create(newProduct);
             if (data.success && data.product) {
                 setProducts([data.product, ...products]);
                 toast.success("Product added successfully!");
@@ -44,7 +39,7 @@ const AddProduct = () => {
                 return;
             }
         } catch {
-            // Add locally to state if backend offline
+            // Add locally to state if server is offline
             setProducts([newProduct, ...products]);
             toast.success("Product added to catalog!");
             navigate('/seller/products-list');

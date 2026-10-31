@@ -1,9 +1,10 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { toast } from 'react-hot-toast';
+import { productApi } from '../../api';
 
 const ProductList = () => {
-    const { products, setProducts, currency, backendUrl } = useAppContext();
+    const { products, setProducts, currency } = useAppContext();
 
     const handleToggleStock = async (product) => {
         const updatedStatus = !product.inStock;
@@ -12,14 +13,8 @@ const ProductList = () => {
         setProducts(products.map((p) => (p._id === product._id ? { ...p, inStock: updatedStatus } : p)));
 
         try {
-            const res = await fetch(`${backendUrl}/api/product/stock/${product._id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ inStock: updatedStatus }),
-            });
-            const data = await res.json();
-            if (data.success) {
+            const data = await productApi.toggleStock(product._id, updatedStatus).catch(() => null);
+            if (data && data.success) {
                 toast.success(data.message || `Product marked as ${updatedStatus ? "In Stock" : "Out of Stock"}`);
                 return;
             }
