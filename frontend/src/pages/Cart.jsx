@@ -3,6 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import { assets, dummyAddress } from '../assets/assets';
 import { toast } from 'react-hot-toast';
 import { orderApi, addressApi } from '../api';
+import PaymentModal from '../components/PaymentModal';
 
 const Cart = () => {
     const [showAddress, setShowAddress] = useState(false);
@@ -13,12 +14,21 @@ const Cart = () => {
     const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
     const [paymentMethod, setPaymentMethod] = useState("COD");
     const [submitting, setSubmitting] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
 
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
                 const res = await addressApi.getAddresses().catch(() => null);
-                const localSaved = JSON.parse(localStorage.getItem('greencart_saved_addresses') || '[]');
+                const localSavedRaw = localStorage.getItem('greencart_saved_addresses');
+                let localSaved = localSavedRaw ? JSON.parse(localSavedRaw) : [];
+
+                // Filter out any stale references to "Great Stack"
+                localSaved = localSaved.filter(
+                    (a) => !(a.firstName === 'Great' && a.lastName === 'Stack') && a.email !== 'user.greatstack@gmail.com'
+                );
+                localStorage.setItem('greencart_saved_addresses', JSON.stringify(localSaved));
+
                 let combined = [];
 
                 if (res && res.success && Array.isArray(res.addresses) && res.addresses.length > 0) {
@@ -28,6 +38,13 @@ const Cart = () => {
                 } else {
                     combined = dummyAddress;
                 }
+
+                // Ensure all addresses have zipCode
+                combined = combined.map(addr => ({
+                    ...addr,
+                    zipCode: String(addr.zipCode || addr.zipcode || '400001'),
+                    zipcode: String(addr.zipCode || addr.zipcode || '400001'),
+                }));
 
                 setAddressList(combined);
                 if (combined.length > 0) {
@@ -65,7 +82,7 @@ const Cart = () => {
     const taxAmount = Math.round(cartAmount * 0.02);
     const totalAmount = cartAmount + taxAmount;
 
-    const placeOrder = async () => {
+    const executeOrderPlacement = async ({ paymentMethodOverride, isPaid = false, transactionId = '' }) => {
         if (!selectedAddress) {
             toast.error("Please select a delivery address");
             return;
@@ -76,15 +93,31 @@ const Cart = () => {
             const orderData = {
                 items: cartArray.map((item) => ({
                     product: item._id,
+                    name: item.name,
+                    price: item.offerPrice || item.price,
+                    image: item.image,
                     quantity: item.quantity,
                 })),
                 amount: totalAmount,
-                address: selectedAddress,
-                paymentMethod,
+                address: {
+                    firstName: selectedAddress.firstName || "Customer",
+                    lastName: selectedAddress.lastName || "",
+                    email: selectedAddress.email || "",
+                    street: selectedAddress.street || "",
+                    city: selectedAddress.city || "",
+                    state: selectedAddress.state || "",
+                    zipCode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
+                    zipcode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
+                    country: selectedAddress.country || "India",
+                    phone: selectedAddress.phone || "",
+                },
+                paymentMethod: paymentMethodOverride || paymentMethod,
+                isPaid,
+                transactionId,
             };
 
             await orderApi.create(orderData).catch(() => null);
-            toast.success("Order placed successfully with Harvesto!");
+            toast.success(isPaid ? "Payment successful! Order confirmed with Harvesto." : "Order placed successfully with Harvesto!");
             setCartItems({});
             navigate('/my-orders');
         } catch (error) {
@@ -94,6 +127,20 @@ const Cart = () => {
             navigate('/my-orders');
         } finally {
             setSubmitting(false);
+            setShowPaymentModal(false);
+        }
+    };
+
+    const handlePlaceOrderClick = () => {
+        if (!selectedAddress) {
+            toast.error("Please select a delivery address");
+            return;
+        }
+
+        if (paymentMethod === "Online") {
+            setShowPaymentModal(true);
+        } else {
+            executeOrderPlacement({ paymentMethodOverride: "COD", isPaid: false });
         }
     };
 
@@ -117,6 +164,17 @@ const Cart = () => {
 
     return (
         <div className="flex flex-col lg:flex-row gap-8 mt-6 mb-20">
+            {/* Payment Modal */}
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={() => setShowPaymentModal(false)}
+                totalAmount={totalAmount}
+                currency={currency}
+                onPaymentSuccess={({ paymentMethod, transactionId }) => {
+                    executeOrderPlacement({ paymentMethodOverride: paymentMethod, isPaid: true, transactionId });
+                }}
+            />
+
             {/* Cart Items Table */}
             <div className='flex-1 bg-white border border-slate-200/80 rounded-3xl p-5 sm:p-8 shadow-sm'>
                 <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
@@ -150,7 +208,7 @@ const Cart = () => {
                                     }} 
                                     className="cursor-pointer w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center border border-slate-200 rounded-2xl p-1 bg-slate-50 shrink-0 hover:border-primary transition"
                                 >
-                                    <img className="max-w-full max-h-full object-contain" src={product.image[0]} alt={product.name} />
+                                    <img className="max-w-full max-h-full object-contain" src={product.image?.[0]} alt={product.name} />
                                 </div>
                                 <div className="min-w-0">
                                     <p className="font-bold text-slate-800 text-xs sm:text-sm truncate">{product.name}</p>
@@ -160,10 +218,10 @@ const Cart = () => {
                                         <label className="text-[11px] text-slate-500 font-semibold">Qty:</label>
                                         <select 
                                             onChange={e => updateCartItem(product._id, Number(e.target.value))} 
-                                            value={cartItems[product._id]} 
+                                            value={cartItems[product._id] || 1} 
                                             className='border border-slate-200 rounded-lg px-2 py-0.5 outline-none text-xs text-slate-700 font-bold bg-white'
                                         >
-                                            {Array(Math.max(cartItems[product._id], 9)).fill('').map((_, index) => (
+                                            {Array.from({ length: Math.max(Number(cartItems[product._id]) || 1, 9) }).map((_, index) => (
                                                 <option key={index} value={index + 1}>{index + 1}</option>
                                             ))}
                                         </select>
@@ -172,7 +230,7 @@ const Cart = () => {
                             </div>
 
                             <p className="text-center font-bold text-slate-800 text-sm sm:text-base">
-                                {currency}{product.offerPrice * product.quantity}
+                                {currency}{product.offerPrice * (cartItems[product._id] || 1)}
                             </p>
 
                             <button 
@@ -252,7 +310,7 @@ const Cart = () => {
                             onClick={() => setPaymentMethod("COD")}
                             className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition ${
                                 paymentMethod === "COD" 
-                                    ? "bg-emerald-50 border-primary text-emerald-800" 
+                                    ? "bg-emerald-50 border-primary text-emerald-800 ring-2 ring-emerald-100" 
                                     : "border-slate-200 text-slate-600 hover:bg-slate-50"
                             }`}
                         >
@@ -263,7 +321,7 @@ const Cart = () => {
                             onClick={() => setPaymentMethod("Online")}
                             className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition ${
                                 paymentMethod === "Online" 
-                                    ? "bg-emerald-50 border-primary text-emerald-800" 
+                                    ? "bg-emerald-50 border-primary text-emerald-800 ring-2 ring-emerald-100" 
                                     : "border-slate-200 text-slate-600 hover:bg-slate-50"
                             }`}
                         >
@@ -293,11 +351,11 @@ const Cart = () => {
                 </div>
 
                 <button 
-                    onClick={placeOrder} 
+                    onClick={handlePlaceOrderClick} 
                     disabled={submitting}
                     className="w-full py-3.5 bg-primary hover:bg-primary-dull text-white font-extrabold rounded-full transition shadow-lg shadow-emerald-600/20 cursor-pointer disabled:opacity-50 text-sm active:scale-95"
                 >
-                    {submitting ? "Placing Your Order..." : `Place Order • ${currency}${totalAmount}`}
+                    {submitting ? "Placing Your Order..." : paymentMethod === "Online" ? `Proceed to Pay • ${currency}${totalAmount}` : `Place Order • ${currency}${totalAmount}`}
                 </button>
             </div>
         </div>

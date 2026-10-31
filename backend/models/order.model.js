@@ -2,8 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 const orderItemSchema = new Schema({
     product: {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
+        type: Schema.Types.Mixed,
         required: true,
     },
     quantity: {
@@ -12,13 +11,15 @@ const orderItemSchema = new Schema({
         min: 1,
         default: 1,
     },
+    name: { type: String },
+    price: { type: Number },
+    image: { type: Array },
 }, { _id: false });
 
 const orderSchema = new Schema({
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
+        type: Schema.Types.Mixed,
+        default: 'guest',
     },
     items: {
         type: [orderItemSchema],
@@ -29,15 +30,16 @@ const orderSchema = new Schema({
         required: true,
     },
     address: {
-        firstName: { type: String, required: true },
-        lastName: { type: String, required: true },
-        email: { type: String, required: true },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        zipCode: { type: String, required: true },
-        country: { type: String, required: true },
-        phone: { type: String, required: true },
+        firstName: { type: String, default: 'Customer' },
+        lastName: { type: String, default: '' },
+        email: { type: String, default: '' },
+        street: { type: String, default: '' },
+        city: { type: String, default: '' },
+        state: { type: String, default: '' },
+        zipCode: { type: String, default: '' },
+        zipcode: { type: String, default: '' },
+        country: { type: String, default: 'India' },
+        phone: { type: String, default: '' },
     },
     status: {
         type: String,
@@ -46,12 +48,15 @@ const orderSchema = new Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['COD', 'Online'],
         default: 'COD',
     },
     isPaid: {
         type: Boolean,
         default: false,
+    },
+    transactionId: {
+        type: String,
+        default: '',
     },
 }, {
     timestamps: true,
@@ -63,4 +68,3 @@ orderSchema.index({ status: 1 });
 
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 export default Order;
-
