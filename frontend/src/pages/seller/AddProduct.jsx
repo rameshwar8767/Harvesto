@@ -13,11 +13,14 @@ const AddProduct = () => {
     const [category, setCategory] = useState("");
     const [price, setPrice] = useState("");
     const [offerPrice, setOfferPrice] = useState("");
+    const [stock, setStock] = useState("25");
     const [loading, setLoading] = useState(false);
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        const stockNum = Math.max(0, parseInt(stock, 10) || 0);
 
         const newProduct = {
             _id: `prod_${Date.now()}`,
@@ -26,8 +29,9 @@ const AddProduct = () => {
             category: category.toLowerCase(),
             price: Number(price),
             offerPrice: Number(offerPrice),
+            stock: stockNum,
+            inStock: stockNum > 0,
             image: [assets.upload_area], // Fallback default image
-            inStock: true,
         };
 
         try {
@@ -141,6 +145,19 @@ const AddProduct = () => {
                             id="offer-price" 
                             type="number" 
                             placeholder="79" 
+                            className="outline-none py-2.5 px-3 rounded border border-gray-300 focus:border-primary text-gray-800" 
+                            required 
+                        />
+                    </div>
+                    <div className="flex-1 flex flex-col gap-1">
+                        <label className="text-sm font-medium text-gray-700" htmlFor="product-stock">Stock Quantity</label>
+                        <input 
+                            onChange={(e) => setStock(e.target.value)} 
+                            value={stock} 
+                            id="product-stock" 
+                            type="number" 
+                            min="0"
+                            placeholder="25" 
                             className="outline-none py-2.5 px-3 rounded border border-gray-300 focus:border-primary text-gray-800" 
                             required 
                         />

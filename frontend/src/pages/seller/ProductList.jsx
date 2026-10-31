@@ -35,7 +35,8 @@ const ProductList = () => {
                                 <th className="px-4 py-3.5">Product</th>
                                 <th className="px-4 py-3.5">Category</th>
                                 <th className="px-4 py-3.5 hidden md:table-cell">Selling Price</th>
-                                <th className="px-4 py-3.5">Stock Status</th>
+                                <th className="px-4 py-3.5">Stock Quantity</th>
+                                <th className="px-4 py-3.5">Status</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm text-gray-600 divide-y divide-gray-100">
@@ -50,16 +51,27 @@ const ProductList = () => {
                                     <td className="px-4 py-3 capitalize text-gray-500">{product.category}</td>
                                     <td className="px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">{currency}{product.offerPrice}</td>
                                     <td className="px-4 py-3">
+                                        <span className={`inline-block font-semibold px-2 py-0.5 rounded text-xs ${
+                                            (product.stock ?? 25) <= 0
+                                                ? 'bg-rose-100 text-rose-700'
+                                                : (product.stock ?? 25) <= 5
+                                                    ? 'bg-amber-100 text-amber-800'
+                                                    : 'bg-emerald-100 text-emerald-800'
+                                        }`}>
+                                            {product.stock !== undefined ? product.stock : 25} units
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3">
                                         <label className="relative inline-flex items-center cursor-pointer gap-2 select-none">
                                             <input 
                                                 type="checkbox" 
-                                                checked={Boolean(product.inStock)}
+                                                checked={Boolean(product.inStock && (product.stock === undefined || product.stock > 0))}
                                                 onChange={() => handleToggleStock(product)}
                                                 className="sr-only peer"
                                             />
                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                             <span className="text-xs font-medium text-gray-500 max-sm:hidden">
-                                                {product.inStock ? "In Stock" : "Out of Stock"}
+                                                {product.inStock && (product.stock === undefined || product.stock > 0) ? "In Stock" : "Out of Stock"}
                                             </span>
                                         </label>
                                     </td>

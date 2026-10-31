@@ -125,6 +125,8 @@ const ProductDetails = () => {
     : 0;
 
   const avgRating = (reviews.reduce((acc, r) => acc + r.rating, 0) / (reviews.length || 1)).toFixed(1);
+  const isOutOfStock = product.inStock === false || (product.stock !== undefined && product.stock <= 0);
+  const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock <= 5;
 
   return (
     <div className="mt-6 mb-20">
@@ -163,15 +165,19 @@ const ProductDetails = () => {
 
           {/* Main Selected Image */}
           <div className="flex-1 w-full max-w-md aspect-square rounded-2xl bg-slate-50/70 border border-slate-200/60 p-6 flex items-center justify-center relative overflow-hidden group">
-            {discountPercent > 0 && (
+            {isOutOfStock ? (
+              <span className="absolute top-4 left-4 bg-rose-600 text-white font-extrabold text-xs px-2.5 py-1 rounded-full shadow-xs">
+                Sold Out
+              </span>
+            ) : discountPercent > 0 ? (
               <span className="absolute top-4 left-4 bg-accent text-slate-950 font-extrabold text-xs px-2.5 py-1 rounded-full shadow-xs">
                 {discountPercent}% OFF
               </span>
-            )}
+            ) : null}
             <img
               src={thumbnail}
               alt={product.name}
-              className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+              className={`max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 ${isOutOfStock ? 'grayscale' : ''}`}
             />
           </div>
         </div>
@@ -183,9 +189,19 @@ const ProductDetails = () => {
               <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full capitalize">
                 {product.category}
               </span>
-              <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-                ● In Stock & Ready to Dispatch
-              </span>
+              {isOutOfStock ? (
+                <span className="text-xs text-rose-600 font-bold flex items-center gap-1">
+                  ✕ Out of Stock - Currently Unavailable
+                </span>
+              ) : isLowStock ? (
+                <span className="text-xs text-amber-600 font-bold flex items-center gap-1">
+                  ⚡ Low Stock - Only {product.stock} units left!
+                </span>
+              ) : (
+                <span className="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                  ● In Stock ({product.stock ?? 25} available) & Ready to Dispatch
+                </span>
+              )}
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
@@ -262,21 +278,32 @@ const ProductDetails = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3 mt-8 pt-4">
-            <button
-              onClick={() => addToCart(product._id)}
-              className="flex-1 py-3.5 px-6 rounded-full font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-800 transition duration-200 cursor-pointer shadow-xs active:scale-95"
-            >
-              Add to Basket
-            </button>
-            <button
-              onClick={() => {
-                addToCart(product._id);
-                navigate("/cart");
-              }}
-              className="flex-1 py-3.5 px-6 rounded-full font-bold text-sm bg-primary hover:bg-primary-dull text-white shadow-lg shadow-emerald-600/20 transition duration-200 cursor-pointer active:scale-95"
-            >
-              Buy Now
-            </button>
+            {isOutOfStock ? (
+              <button
+                disabled
+                className="w-full py-4 px-6 rounded-full font-bold text-sm bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+              >
+                Currently Out of Stock
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => addToCart(product._id)}
+                  className="flex-1 py-3.5 px-6 rounded-full font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-800 transition duration-200 cursor-pointer shadow-xs active:scale-95"
+                >
+                  Add to Basket
+                </button>
+                <button
+                  onClick={() => {
+                    addToCart(product._id);
+                    navigate("/cart");
+                  }}
+                  className="flex-1 py-3.5 px-6 rounded-full font-bold text-sm bg-primary hover:bg-primary-dull text-white shadow-lg shadow-emerald-600/20 transition duration-200 cursor-pointer active:scale-95"
+                >
+                  Buy Now
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

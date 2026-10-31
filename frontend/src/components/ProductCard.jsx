@@ -21,17 +21,24 @@ const ProductCard = ({ product }) => {
     ? Math.round(((product.price - product.offerPrice) / product.price) * 100)
     : 0;
 
+  const isOutOfStock = product.inStock === false || (product.stock !== undefined && product.stock <= 0);
+  const isLowStock = !isOutOfStock && product.stock !== undefined && product.stock <= 5;
+
   return (
     <div 
       onClick={() => {
         navigate(`/products/${product.category.toLowerCase()}/${product._id}`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }}
-      className="group relative bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-card-hover hover:border-emerald-300 transition-all duration-300 cursor-pointer overflow-hidden"
+      className={`group relative bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-card-hover hover:border-emerald-300 transition-all duration-300 cursor-pointer overflow-hidden ${isOutOfStock ? 'opacity-80' : ''}`}
     >
       {/* Top Badges */}
       <div className="flex items-center justify-between w-full mb-2">
-        {discountPercent > 0 ? (
+        {isOutOfStock ? (
+          <span className="bg-rose-100 text-rose-700 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            Sold Out
+          </span>
+        ) : discountPercent > 0 ? (
           <span className="bg-amber-100 text-amber-800 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
             {discountPercent}% OFF
           </span>
@@ -46,13 +53,20 @@ const ProductCard = ({ product }) => {
       </div>
 
       {/* Product Image Area */}
-      <div className="w-full aspect-square flex items-center justify-center p-2 mb-2 rounded-xl bg-slate-50/60 group-hover:bg-emerald-50/30 transition-colors">
+      <div className="w-full aspect-square flex items-center justify-center p-2 mb-2 rounded-xl bg-slate-50/60 group-hover:bg-emerald-50/30 transition-colors relative">
         <img
-          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+          className={`max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 ${isOutOfStock ? 'grayscale' : ''}`}
           src={product.image?.[0]}
           alt={product.name}
           loading="lazy"
         />
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-[1px] rounded-xl flex items-center justify-center">
+            <span className="bg-rose-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
+              OUT OF STOCK
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Details Area */}
@@ -89,12 +103,25 @@ const ProductCard = ({ product }) => {
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-emerald-600 font-semibold">In Stock</p>
+            {isOutOfStock ? (
+              <p className="text-[10px] text-rose-600 font-bold">Out of Stock</p>
+            ) : isLowStock ? (
+              <p className="text-[10px] text-amber-600 font-bold">Only {product.stock} left!</p>
+            ) : (
+              <p className="text-[10px] text-emerald-600 font-semibold">In Stock ({product.stock ?? 25})</p>
+            )}
           </div>
 
           {/* Add / Quantity Stepper Button */}
           <div onClick={(e) => e.stopPropagation()}>
-            {!isInCart ? (
+            {isOutOfStock ? (
+              <button
+                disabled
+                className="bg-slate-100 text-slate-400 border border-slate-200 px-3 py-1.5 rounded-full text-xs font-bold cursor-not-allowed"
+              >
+                Sold Out
+              </button>
+            ) : !isInCart ? (
               <button
                 onClick={() => addToCart(product._id)}
                 className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-primary hover:text-white text-emerald-800 border border-emerald-300 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs active:scale-95"
