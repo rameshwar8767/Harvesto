@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { dummyOrders } from '../assets/assets';
+import { orderApi } from '../api';
 
 const MyOrders = () => {
   const [myOrders, setMyOrders] = useState([]);
   const { currency } = useAppContext();
 
   useEffect(() => {
-    setMyOrders(dummyOrders);
+    const fetchOrders = async () => {
+      try {
+        const res = await orderApi.getUserOrders().catch(() => null);
+        if (res && res.success && Array.isArray(res.orders) && res.orders.length > 0) {
+          setMyOrders(res.orders);
+          return;
+        }
+        setMyOrders(dummyOrders);
+      } catch {
+        setMyOrders(dummyOrders);
+      }
+    };
+
+    fetchOrders();
   }, []);
 
   return (

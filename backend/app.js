@@ -4,11 +4,9 @@ dotenv.config();
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
 import connectDB from './configs/db.js';
-import userRouter from "./routes/user.routes.js";
-import sellerRouter from "./routes/seller.routes.js";
-import productRouter from "./routes/product.routes.js";
-import orderRouter from "./routes/order.routes.js";
+import apiRouter from './routes/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,11 +41,8 @@ app.get('/', (req, res) => {
     res.send('GreenCart API is running');
 });
 
-// Mount Routes
-app.use('/api/user', userRouter);
-app.use('/api/seller', sellerRouter);
-app.use('/api/product', productRouter);
-app.use('/api/order', orderRouter);
+// Centralized API Router
+app.use('/api', apiRouter);
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
@@ -56,20 +51,23 @@ app.use((err, req, res, next) => {
     res.status(statusCode).json({
         success: false,
         message: err.message || "Internal Server Error",
+        errors: err.errors || [],
     });
 });
 
-const startServer = async () => {
-    try {
-        await connectDB();
-        app.listen(PORT, () => {
-            console.log(`🚀 GreenCart backend server running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error("❌ Failed to start server due to MongoDB error:", error.message);
-    }
-};
-
-startServer();
+// Allow running directly via "node app.js" while also being imported by server.js
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const startServer = async () => {
+        try {
+            await connectDB();
+            app.listen(PORT, () => {
+                console.log(`🚀 GreenCart backend server running on port ${PORT}`);
+            });
+        } catch (error) {
+            console.error("❌ Failed to start server due to MongoDB error:", error.message);
+        }
+    };
+    startServer();
+}
 
 export default app;

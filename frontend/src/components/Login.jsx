@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { toast } from 'react-hot-toast';
+import { authApi } from '../api';
 
 const Login = () => {
     const [state, setState] = useState("login");
@@ -9,25 +10,15 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const { setShowUserLogin, setUser, backendUrl } = useAppContext();
+    const { setShowUserLogin, setUser } = useAppContext();
 
     const onSubmitHandler = async (event) => {
         event.preventDefault();
         setLoading(true);
         try {
-            const endpoint = state === "login" ? `${backendUrl}/api/user/login` : `${backendUrl}/api/user/register`;
-            const payload = state === "login" ? { email, password } : { name, email, password };
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify(payload),
-            });
-
-            const data = await response.json();
+            const data = state === "login" 
+                ? await authApi.login({ email, password })
+                : await authApi.register({ name, email, password });
 
             if (data.success && data.user) {
                 setUser(data.user);
@@ -38,7 +29,7 @@ const Login = () => {
             }
         } catch (error) {
             console.error("Auth request error:", error);
-            // Fallback for demo when backend is offline
+            // Fallback for local preview if server offline
             setUser({ email, name: name || email.split('@')[0] });
             toast.success(`${state === "login" ? "Logged in" : "Registered"} (demo session)`);
             setShowUserLogin(false);

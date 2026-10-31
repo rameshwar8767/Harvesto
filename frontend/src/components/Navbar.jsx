@@ -2,14 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { assets } from '../assets/assets';
 import { useAppContext } from '../context/AppContext';
+import { authApi } from '../api';
 
 const Navbar = () => {
     const [open, setOpen] = useState(false);
     const { user, setUser, getCartCount, setShowUserLogin, setSearchQuery, searchQuery, navigate } = useAppContext();
 
-    const logout = () => {
-        setUser(null);
-        navigate('/');
+    const logout = async () => {
+        try {
+            await authApi.logout().catch(() => null);
+        } finally {
+            setUser(null);
+            navigate('/');
+        }
     };
 
     useEffect(() => {

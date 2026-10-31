@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from "rea
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
 import { toast } from "react-hot-toast";
+import { authApi, productApi } from "../api";
 
 export const AppContext = createContext();
 
@@ -32,6 +33,31 @@ export const AppContextProvider = ({ children }) => {
             console.error("Failed to save cart to localStorage", e);
         }
     }, [cartItems]);
+
+    // Check existing authentication sessions on initial mount
+    useEffect(() => {
+        const verifySession = async () => {
+            try {
+                const userRes = await authApi.checkAuth().catch(() => null);
+                if (userRes && userRes.success && userRes.user) {
+                    setUser(userRes.user);
+                }
+            } catch {
+                // Session not active
+            }
+
+            try {
+                const sellerRes = await authApi.checkSellerAuth().catch(() => null);
+                if (sellerRes && sellerRes.success && sellerRes.isSeller) {
+                    setIsSeller(true);
+                }
+            } catch {
+                // Seller session not active
+            }
+        };
+
+        verifySession();
+    }, []);
 
     const addToCart = (itemId) => {
         if (!itemId) return;
@@ -72,21 +98,17 @@ export const AppContextProvider = ({ children }) => {
 
     const fetchProducts = useCallback(async () => {
         try {
-            // Attempt to fetch from backend API if running, fallback to dummyProducts
-            const res = await fetch(`${backendUrl}/api/product/list`).catch(() => null);
-            if (res && res.ok) {
-                const data = await res.json();
-                if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-                    setProducts(data.products);
-                    return;
-                }
+            const data = await productApi.getAll().catch(() => null);
+            if (data && data.success && Array.isArray(data.products) && data.products.length > 0) {
+                setProducts(data.products);
+                return;
             }
             setProducts(dummyProducts);
         } catch (error) {
             console.warn("Using fallback dummy products:", error);
             setProducts(dummyProducts);
         }
-    }, [backendUrl]);
+    }, []);
 
     useEffect(() => {
         fetchProducts();

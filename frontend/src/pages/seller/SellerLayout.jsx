@@ -2,6 +2,7 @@ import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { assets } from '../../assets/assets';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { authApi } from '../../api';
 
 const SellerLayout = () => {
     const { setIsSeller } = useAppContext();
@@ -13,7 +14,11 @@ const SellerLayout = () => {
     ];
 
     const logout = async () => {
-        setIsSeller(false);
+        try {
+            await authApi.sellerLogout().catch(() => null);
+        } finally {
+            setIsSeller(false);
+        }
     };
 
     return (
