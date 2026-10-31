@@ -50,7 +50,7 @@ export const getProducts = asyncHandler(async (req, res) => {
         filter.name = { $regex: search, $options: "i" };
     }
 
-    const products = await Product.find(filter).sort({ createdAt: -1 });
+    const products = await Product.find(filter).sort({ createdAt: -1 }).lean();
 
     return res.json({
         success: true,
@@ -62,7 +62,7 @@ export const getProducts = asyncHandler(async (req, res) => {
 // Get Product by ID : GET /api/product/:id
 export const getProduct = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    const product = await Product.findById(id);
+    const product = await Product.findById(id).lean();
 
     if (!product) {
         return res.status(404).json({

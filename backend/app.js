@@ -7,9 +7,14 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import connectDB from './configs/db.js';
 import apiRouter from './routes/index.js';
+import { securityHeaders, sanitizeInput } from './middlewares/security.middleware.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Apply security HTTP headers and request sanitization
+app.use(securityHeaders);
+app.use(sanitizeInput);
 
 // Allow local frontend origins
 const allowedOrigins = [
@@ -46,12 +51,39 @@ app.use('/api', apiRouter);
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
-    console.error("Unhandled Error:", err);
-    const statusCode = err.statusCode || 500;
+    let statusCode = err.statusCode || 500;
+    let message = err.message || "Internal Server Error";
+    let errors = err.errors || [];
+
+    // Handle Mongoose Validation Error
+    if (err.name === 'ValidationError') {
+        statusCode = 400;
+        message = "Validation Error";
+        errors = Object.values(err.errors || {}).map((e) => e.message);
+    }
+
+    // Handle Mongoose Bad ObjectId (CastError)
+    if (err.name === 'CastError') {
+        statusCode = 400;
+        message = `Invalid format for resource identifier: ${err.value}`;
+    }
+
+    // Handle MongoDB Duplicate Key Error (E11000)
+    if (err.code === 11000) {
+        statusCode = 409;
+        const field = Object.keys(err.keyValue || {})[0] || 'field';
+        message = `A record with this ${field} already exists`;
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        console.error(`[Server Error ${statusCode}] ${req.method} ${req.originalUrl}:`, err.message);
+    }
+
     res.status(statusCode).json({
         success: false,
-        message: err.message || "Internal Server Error",
-        errors: err.errors || [],
+        message,
+        errors,
+        ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {}),
     });
 });
 

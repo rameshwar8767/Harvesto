@@ -20,6 +20,9 @@ const addressSchema = new Schema({
     timestamps: true,
 });
 
+// Compound index for user addresses fast lookup
+addressSchema.index({ userId: 1, isDefault: -1, createdAt: -1 });
+
 const Address = mongoose.models.Address || mongoose.model('Address', addressSchema);
 export default Address;
 

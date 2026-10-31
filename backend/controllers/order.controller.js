@@ -42,7 +42,8 @@ export const getUserOrders = asyncHandler(async (req, res) => {
     const userId = req.userId || req.body.userId;
     const orders = await Order.find({ userId })
         .populate("items.product")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
     return res.json({
         success: true,
@@ -54,7 +55,8 @@ export const getUserOrders = asyncHandler(async (req, res) => {
 export const getAllOrders = asyncHandler(async (req, res) => {
     const orders = await Order.find({})
         .populate("items.product")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
 
     return res.json({
         success: true,

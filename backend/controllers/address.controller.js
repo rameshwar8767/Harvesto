@@ -42,7 +42,7 @@ export const addAddress = asyncHandler(async (req, res) => {
 export const getUserAddresses = asyncHandler(async (req, res) => {
     const userId = req.userId || req.body.userId;
 
-    const addresses = await Address.find({ userId }).sort({ isDefault: -1, createdAt: -1 });
+    const addresses = await Address.find({ userId }).sort({ isDefault: -1, createdAt: -1 }).lean();
 
     return res.json({
         success: true,
