@@ -2,9 +2,6 @@ import React from 'react';
 import { assets } from '../assets/assets';
 import { useAppContext } from '../context/AppContext';
 
-
-
-
 const ProductCard = ({ product }) => {
   const {
     cartItems,
@@ -16,64 +13,110 @@ const ProductCard = ({ product }) => {
 
   if (!product) return null;
 
-  const isInCart = !!cartItems[product._id];
+  const isInCart = Boolean(cartItems[product._id]);
+  const currentQty = cartItems[product._id] || 0;
   const rating = 4;
 
+  const discountPercent = product.price > product.offerPrice 
+    ? Math.round(((product.price - product.offerPrice) / product.price) * 100)
+    : 0;
+
   return (
-    <div onClick={()=>{navigate(`/products/${product.category.toLowerCase()}/${product._id}`); scrollTo(0,0)}} className="border border-gray-300 rounded-lg bg-white shadow-sm hover:shadow-md transition-all md:px-4 px-3 py-3 min-w-56 max-w-56 w-full">
-      <div className="group cursor-pointer flex items-center justify-center px-2">
+    <div 
+      onClick={() => {
+        navigate(`/products/${product.category.toLowerCase()}/${product._id}`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }}
+      className="group relative bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-col justify-between hover:shadow-card-hover hover:border-emerald-300 transition-all duration-300 cursor-pointer overflow-hidden"
+    >
+      {/* Top Badges */}
+      <div className="flex items-center justify-between w-full mb-2">
+        {discountPercent > 0 ? (
+          <span className="bg-amber-100 text-amber-800 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+            {discountPercent}% OFF
+          </span>
+        ) : (
+          <span className="bg-emerald-50 text-emerald-700 text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full">
+            Fresh
+          </span>
+        )}
+        <span className="text-[11px] text-slate-400 capitalize font-medium">
+          {product.category}
+        </span>
+      </div>
+
+      {/* Product Image Area */}
+      <div className="w-full aspect-square flex items-center justify-center p-2 mb-2 rounded-xl bg-slate-50/60 group-hover:bg-emerald-50/30 transition-colors">
         <img
-          className="group-hover:scale-105 transition-transform max-w-26 md:max-w-36 object-contain"
-          src={product.image[0]}
+          className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300"
+          src={product.image?.[0]}
           alt={product.name}
+          loading="lazy"
         />
       </div>
 
-      <div className="text-sm text-gray-600 mt-2 space-y-1">
-        <p className="text-gray-400">{product.category}</p>
-        <p className="text-gray-800 font-semibold text-lg truncate">{product.name}</p>
+      {/* Details Area */}
+      <div className="flex flex-col flex-1 justify-between mt-1">
+        <div>
+          <h3 className="text-slate-800 font-semibold text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors" title={product.name}>
+            {product.name}
+          </h3>
 
-        <div className="flex items-center gap-1">
-          {Array(5).fill().map((_, i) => (
-            <img
-              key={i}
-              className="w-4 h-4"
-              src={i < rating ? assets.star_icon : assets.star_dull_icon}
-              alt={`star-${i + 1}`}
-            />
-          ))}
-          <span className="text-xs">(4)</span>
+          {/* Star Rating */}
+          <div className="flex items-center gap-1 mt-1">
+            {Array(5).fill('').map((_, i) => (
+              <img
+                key={i}
+                className="w-3 sm:w-3.5 h-3 sm:h-3.5"
+                src={i < rating ? assets.star_icon : assets.star_dull_icon}
+                alt="star"
+              />
+            ))}
+            <span className="text-[11px] text-slate-400 font-medium ml-1">4.0</span>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between mt-3">
-          <p className="text-primary font-semibold md:text-xl text-base">
-            {currency}{product.offerPrice}
-            <span className="line-through text-xs text-gray-400 ml-1">
-              {currency}{product.price}
-            </span>
-          </p>
+        {/* Price & Cart Control Row */}
+        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100">
+          <div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-slate-900 font-bold text-base sm:text-lg">
+                {currency}{product.offerPrice}
+              </span>
+              {product.price > product.offerPrice && (
+                <span className="line-through text-xs text-slate-400">
+                  {currency}{product.price}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-emerald-600 font-semibold">In Stock</p>
+          </div>
 
-          <div onClick={(e) => e.stopPropagation()} className="text-primary">
+          {/* Add / Quantity Stepper Button */}
+          <div onClick={(e) => e.stopPropagation()}>
             {!isInCart ? (
               <button
                 onClick={() => addToCart(product._id)}
-                className="flex items-center gap-1 bg-primary/10 border border-primary/40 md:w-[80px] w-[64px] h-[34px] rounded hover:bg-primary/20 transition text-sm justify-center"
+                className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-primary hover:text-white text-emerald-800 border border-emerald-300 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer shadow-xs active:scale-95"
+                aria-label={`Add ${product.name} to cart`}
               >
-                <img src={assets.cart_icon} alt="cart" />
-                Add
+                <img src={assets.cart_icon} alt="cart" className="w-3.5 h-3.5 opacity-80" />
+                <span>ADD</span>
               </button>
             ) : (
-              <div className="flex items-center justify-center gap-2 md:w-20 w-16 h-[34px] bg-primary/10 rounded select-none">
+              <div className="flex items-center justify-between bg-primary text-white rounded-full px-2 py-1 gap-2 text-xs font-bold shadow-xs">
                 <button
                   onClick={() => removeFromCart(product._id)}
-                  className="px-2 text-md hover:text-red-500"
+                  className="w-5 h-5 flex items-center justify-center hover:bg-black/20 rounded-full transition cursor-pointer text-sm font-black"
+                  aria-label="Decrease quantity"
                 >
-                  -
+                  −
                 </button>
-                <span className="w-5 text-center">{cartItems[product._id]}</span>
+                <span className="min-w-[12px] text-center text-xs font-bold">{currentQty}</span>
                 <button
                   onClick={() => addToCart(product._id)}
-                  className="px-2 text-md hover:text-green-600"
+                  className="w-5 h-5 flex items-center justify-center hover:bg-black/20 rounded-full transition cursor-pointer text-sm font-black"
+                  aria-label="Increase quantity"
                 >
                   +
                 </button>
