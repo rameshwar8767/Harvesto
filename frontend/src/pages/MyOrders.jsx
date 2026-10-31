@@ -80,15 +80,40 @@ const MyOrders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
+      let localOrders = [];
+      try {
+        const storedRaw = localStorage.getItem('harvesto_user_orders');
+        localOrders = storedRaw ? JSON.parse(storedRaw) : [];
+      } catch {
+        localOrders = [];
+      }
+
       try {
         const res = await orderApi.getUserOrders().catch(() => null);
         if (res && res.success && Array.isArray(res.orders) && res.orders.length > 0) {
-          setMyOrders(res.orders);
+          const all = [...localOrders, ...res.orders];
+          const seen = new Set();
+          const unique = all.filter(o => {
+            const id = o._id || o.transactionId;
+            if (!id || seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
+          setMyOrders(unique);
           return;
         }
-        setMyOrders(dummyOrders);
+
+        const combined = [...localOrders, ...dummyOrders];
+        const seen = new Set();
+        const unique = combined.filter(o => {
+          const id = o._id || o.transactionId;
+          if (!id || seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
+        setMyOrders(unique);
       } catch {
-        setMyOrders(dummyOrders);
+        setMyOrders([...localOrders, ...dummyOrders]);
       }
     };
 

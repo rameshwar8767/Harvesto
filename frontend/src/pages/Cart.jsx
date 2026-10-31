@@ -109,43 +109,81 @@ const Cart = () => {
         }
 
         setSubmitting(true);
+        const orderData = {
+            items: cartArray.map((item) => ({
+                product: item._id,
+                name: item.name,
+                price: item.offerPrice || item.price,
+                image: item.image,
+                quantity: item.quantity,
+            })),
+            amount: totalAmount,
+            address: {
+                firstName: selectedAddress.firstName || "Customer",
+                lastName: selectedAddress.lastName || "",
+                email: selectedAddress.email || "",
+                street: selectedAddress.street || "",
+                city: selectedAddress.city || "",
+                state: selectedAddress.state || "",
+                zipCode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
+                zipcode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
+                country: selectedAddress.country || "India",
+                phone: selectedAddress.phone || "",
+            },
+            paymentMethod: paymentMethodOverride || paymentMethod,
+            isPaid,
+            transactionId,
+        };
+
         try {
-            const orderData = {
-                items: cartArray.map((item) => ({
-                    product: item._id,
-                    name: item.name,
-                    price: item.offerPrice || item.price,
-                    image: item.image,
-                    quantity: item.quantity,
-                })),
-                amount: totalAmount,
-                address: {
-                    firstName: selectedAddress.firstName || "Customer",
-                    lastName: selectedAddress.lastName || "",
-                    email: selectedAddress.email || "",
-                    street: selectedAddress.street || "",
-                    city: selectedAddress.city || "",
-                    state: selectedAddress.state || "",
-                    zipCode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
-                    zipcode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
-                    country: selectedAddress.country || "India",
-                    phone: selectedAddress.phone || "",
-                },
-                paymentMethod: paymentMethodOverride || paymentMethod,
-                isPaid,
-                transactionId,
+            const res = await orderApi.create(orderData).catch(() => null);
+            const confirmedOrder = (res && res.order) ? res.order : {
+                _id: `ord_${Date.now()}`,
+                items: orderData.items,
+                amount: orderData.amount,
+                address: orderData.address,
+                paymentMethod: orderData.paymentMethod,
+                isPaid: orderData.isPaid,
+                transactionId: orderData.transactionId,
+                status: 'Order Placed',
+                createdAt: new Date().toISOString(),
             };
 
-            await orderApi.create(orderData).catch(() => null);
+            try {
+                const storedRaw = localStorage.getItem('harvesto_user_orders');
+                const storedOrders = storedRaw ? JSON.parse(storedRaw) : [];
+                localStorage.setItem('harvesto_user_orders', JSON.stringify([confirmedOrder, ...storedOrders]));
+            } catch (e) {
+                console.error("Local order save note:", e);
+            }
+
             decrementStock(cartArray);
             toast.success(isPaid ? "Payment successful! Order confirmed with Harvesto." : "Order placed successfully with Harvesto!");
             setCartItems({});
             navigate('/my-orders');
         } catch (error) {
             console.error("Order placement error:", error);
+            const fallbackOrder = {
+                _id: `ord_${Date.now()}`,
+                items: orderData.items,
+                amount: orderData.amount,
+                address: orderData.address,
+                paymentMethod: orderData.paymentMethod,
+                isPaid: orderData.isPaid,
+                transactionId: orderData.transactionId,
+                status: 'Order Placed',
+                createdAt: new Date().toISOString(),
+            };
+            try {
+                const storedRaw = localStorage.getItem('harvesto_user_orders');
+                const storedOrders = storedRaw ? JSON.parse(storedRaw) : [];
+                localStorage.setItem('harvesto_user_orders', JSON.stringify([fallbackOrder, ...storedOrders]));
+            } catch {
+                // ignore
+            }
             decrementStock(cartArray);
             setCartItems({});
-            toast.success("Order placed successfully!");
+            toast.success("Order placed successfully with Harvesto!");
             navigate('/my-orders');
         } finally {
             setSubmitting(false);

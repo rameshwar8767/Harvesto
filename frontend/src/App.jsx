@@ -16,6 +16,7 @@ const ProductDetails = lazy(() => import('./pages/ProductDetails'));
 const Cart = lazy(() => import('./pages/Cart'));
 const AddAddress = lazy(() => import('./pages/AddAddress'));
 const MyOrders = lazy(() => import('./pages/MyOrders'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SellerLogin = lazy(() => import('./components/seller/SellerLogin'));
 const SellerLayout = lazy(() => import('./pages/seller/SellerLayout'));
 const AddProduct = lazy(() => import('./pages/seller/AddProduct'));
@@ -70,6 +71,7 @@ function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/add-address" element={<AddAddress />} />
               <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/login" element={<LoginPage />} />
               <Route path="/seller" element={isSeller ? <SellerLayout /> : <SellerLogin />}>
                 <Route index element={isSeller ? <AddProduct /> : null} />
                 <Route path='products-list' element={<ProductList />} />

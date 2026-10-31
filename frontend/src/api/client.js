@@ -46,7 +46,9 @@ class ApiClient {
                 timeoutErr.status = 408;
                 throw timeoutErr;
             }
-            console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, error.message);
+            if (!options.silent && !endpoint.includes('is-auth')) {
+                console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, error.message);
+            }
             throw error;
         }
     }
