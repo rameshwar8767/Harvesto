@@ -2,7 +2,7 @@
 
 > Full-stack MERN e-commerce application delivering farm-fresh vegetables, organic fruits, dairy, and bakery staples with express 15-minute dispatch.
 
-![Harvesto Banner](https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80)
+![Harvesto Banner](frontend\public\d.png)
 
 ---
 
@@ -70,7 +70,7 @@ graph TD
 ## 📂 Folder Structure
 
 ```
-GreenCart/
+Harvesto/
 ├── backend/
 │   ├── configs/
 │   │   ├── db.js                 # MongoDB connection logic
