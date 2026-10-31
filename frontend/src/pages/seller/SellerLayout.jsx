@@ -9,8 +9,8 @@ const SellerLayout = () => {
 
     const sidebarLinks = [
         { name: "Add Product", path: '/seller', icon: assets.add_icon },
-        { name: "Product List", path: '/seller/products-list', icon: assets.product_list_icon },
-        { name: "Orders", path: '/seller/orders', icon: assets.order_icon },
+        { name: "Product Catalog", path: '/seller/products-list', icon: assets.product_list_icon },
+        { name: "Customer Orders", path: '/seller/orders', icon: assets.order_icon },
     ];
 
     const logout = async () => {
@@ -22,37 +22,69 @@ const SellerLayout = () => {
     };
 
     return (
-        <>
-            <div className="flex items-center justify-between px-4 md:px-8 border-b border-gray-300 py-3 bg-white">
-                <Link to='/'>
-                    <img src={assets.logo} alt="GreenCart Logo" className="cursor-pointer h-9 w-32 md:w-36 object-contain" />
-                </Link>
-                <div className="flex items-center gap-5 text-gray-500">
-                    <p>Hi! Admin</p>
-                    <button onClick={logout} className='border border-gray-300 hover:bg-gray-100 transition rounded-full text-sm px-4 py-1 cursor-pointer'>Logout</button>
+        <div className="min-h-screen flex flex-col bg-slate-50">
+            {/* Top Navigation */}
+            <header className="flex items-center justify-between px-6 md:px-10 border-b border-slate-200 py-3.5 bg-white sticky top-0 z-40">
+                <div className="flex items-center gap-4">
+                    <Link to='/'>
+                        <img src={assets.logo} alt="Harvesto Logo" className="cursor-pointer h-9 w-auto" />
+                    </Link>
+                    <span className="hidden sm:inline-block bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-1 rounded-full border border-slate-200">
+                        Seller Hub
+                    </span>
                 </div>
-            </div>
-            <div className='flex'>
-                <div className="md:w-64 w-16 border-r h-[95vh] text-base border-gray-300 pt-4 flex flex-col transition-all duration-300">
-                    {sidebarLinks.map((item) => (
-                        <NavLink 
-                            to={item.path} 
-                            key={item.name} 
-                            end={item.path === "/seller"}
-                            className={({ isActive }) => `flex items-center py-3 px-4 gap-3 transition-colors ${
-                                isActive 
-                                    ? "border-r-4 md:border-r-[6px] bg-indigo-500/10 border-primary text-primary font-medium"
-                                    : "hover:bg-gray-100/90 border-transparent text-gray-600"
-                            }`}
-                        >
-                            <img src={item.icon} alt={item.name} className='w-7 h-7' />
-                            <p className="md:block hidden text-center">{item.name}</p>
-                        </NavLink>
-                    ))}
+                <div className="flex items-center gap-4">
+                    <div className="text-right hidden sm:block">
+                        <p className="text-xs font-bold text-slate-800">Store Manager</p>
+                        <p className="text-[10px] text-emerald-600 font-semibold">● Store Online</p>
+                    </div>
+                    <button 
+                        onClick={logout} 
+                        className="border border-slate-200 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition text-slate-600 rounded-full text-xs font-bold px-4 py-1.5 cursor-pointer"
+                    >
+                        Logout
+                    </button>
                 </div>
-                <Outlet/>
+            </header>
+
+            {/* Main Content Area with Sidebar */}
+            <div className="flex flex-1">
+                {/* Modern Sidebar */}
+                <aside className="md:w-64 w-16 border-r border-slate-200/80 bg-white pt-6 flex flex-col transition-all duration-300 shrink-0">
+                    <div className="px-4 mb-3 hidden md:block">
+                        <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Management</p>
+                    </div>
+                    <nav className="space-y-1.5 px-2">
+                        {sidebarLinks.map((item) => (
+                            <NavLink 
+                                to={item.path} 
+                                key={item.name} 
+                                end={item.path === "/seller"}
+                                className={({ isActive }) => `flex items-center py-2.5 px-3.5 gap-3 rounded-xl transition-all ${
+                                    isActive 
+                                        ? "bg-primary text-white font-bold shadow-xs shadow-emerald-600/30"
+                                        : "hover:bg-slate-100 text-slate-600 font-medium"
+                                }`}
+                            >
+                                <img src={item.icon} alt={item.name} className="w-5 h-5 shrink-0" />
+                                <span className="md:block hidden text-xs sm:text-sm">{item.name}</span>
+                            </NavLink>
+                        ))}
+                    </nav>
+
+                    <div className="mt-auto p-4 border-t border-slate-100 hidden md:block">
+                        <Link to="/" className="text-xs font-bold text-slate-500 hover:text-primary transition flex items-center gap-1.5">
+                            <span>←</span> Back to Storefront
+                        </Link>
+                    </div>
+                </aside>
+
+                {/* Nested Outlet View */}
+                <main className="flex-1 overflow-y-auto max-h-[calc(100vh-65px)]">
+                    <Outlet />
+                </main>
             </div>
-        </>
+        </div>
     );
 };
 
