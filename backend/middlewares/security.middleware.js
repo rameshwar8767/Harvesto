@@ -87,3 +87,4 @@ export const sanitizeInput = (req, res, next) => {
     if (req.query) sanitize(req.query);
     next();
 };
+

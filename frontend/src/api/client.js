@@ -12,10 +12,14 @@ class ApiClient {
             ...(options.headers || {}),
         };
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), options.timeout || 10000);
+
         const config = {
             ...options,
             headers,
             credentials: 'include', // Includes HTTP-only cookies
+            signal: controller.signal,
         };
 
         if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
@@ -24,6 +28,7 @@ class ApiClient {
 
         try {
             const response = await fetch(url, config);
+            clearTimeout(timeoutId);
             const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
@@ -35,7 +40,13 @@ class ApiClient {
 
             return data;
         } catch (error) {
-            console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, error);
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                const timeoutErr = new Error(`Request timed out after ${options.timeout || 10000}ms`);
+                timeoutErr.status = 408;
+                throw timeoutErr;
+            }
+            console.error(`[API Error] ${options.method || 'GET'} ${endpoint}:`, error.message);
             throw error;
         }
     }

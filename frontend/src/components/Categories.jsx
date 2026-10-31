@@ -40,6 +40,8 @@ const Categories = () => {
               <img
                 src={category.image}
                 alt={category.text}
+                loading="lazy"
+                decoding="async"
                 className="max-h-full max-w-full object-contain drop-shadow-sm"
               />
             </div>
