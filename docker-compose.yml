@@ -1,0 +1,64 @@
+services:
+  # Database Service
+  mongodb:
+    image: mongo:7.0-jammy
+    container_name: harvesto-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: greencart
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - harvesto-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Express REST API Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: harvesto-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://mongodb:27017/greencart
+      JWT_SECRET: harvesto_super_secret_jwt_key_2026
+      SELLER_EMAIL: seller@harvesto.com
+      SELLER_PASSWORD: harvesto_seller_password
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - harvesto-net
+
+  # React 19 Frontend with Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: harvesto-frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - harvesto-net
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  harvesto-net:
+    driver: bridge

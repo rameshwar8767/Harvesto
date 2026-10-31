@@ -1,4 +1,4 @@
-name: GreenCart CI Pipeline
+name: Harvesto CI Pipeline
 
 on:
   push:
@@ -33,6 +33,10 @@ jobs:
           node -c routes/index.js
           node -c controllers/product.controller.js
           node -c controllers/order.controller.js
+          node -c controllers/address.controller.js
+
+      - name: Run Backend Automated Tests
+        run: npm test
 
   frontend-checks:
     runs-on: ubuntu-latest
@@ -56,6 +60,8 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
+      - name: Run Frontend Automated Tests
+        run: npm test
+
       - name: Build Frontend Application
         run: npm run build
-

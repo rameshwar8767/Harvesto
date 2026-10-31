@@ -261,16 +261,44 @@ Open your browser and navigate to `http://localhost:5173`.
 ### Run Automated Quality Checks
 
 ```bash
-# 1. Backend Syntax & Compilation Verification
-node -c backend/server.js backend/app.js backend/routes/*.js backend/controllers/*.js
+# 1. Run Backend Automated Test Suite
+cd backend
+npm test
 
-# 2. Frontend ESLint Check
-cd frontend
+# 2. Run Frontend Automated Test Suite
+cd ../frontend
+npm test
+
+# 3. Frontend ESLint Check
 npm run lint
 
-# 3. Production Vite Bundle Build
+# 4. Production Vite Bundle Build
 npm run build
 ```
+
+---
+
+## 🐳 Docker Containerization Quickstart
+
+The entire Harvesto full stack (React 19 + Nginx, Express 5 API, and MongoDB 7) can be spun up in one command:
+
+```bash
+# Start all containers in the background
+docker compose up --build -d
+
+# Check status
+docker compose ps
+
+# View live application logs
+docker compose logs -f
+
+# Teardown
+docker compose down -v
+```
+
+- **Frontend Application**: `http://localhost:80` (or `http://localhost:3000`)
+- **Backend API**: `http://localhost:5000/api/health`
+- **MongoDB**: `localhost:27017`
 
 ---
 
