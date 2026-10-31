@@ -2,7 +2,7 @@
 
 > Full-stack MERN e-commerce application delivering farm-fresh vegetables, organic fruits, dairy, and bakery staples with express 15-minute dispatch.
 
-![Harvesto Banner](https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80)
+![Harvesto Banner](https://drive.google.com/file/d/1ZJojiKUyMQZXDFYbfHlN4xyMMr6QhAFH/view?usp=sharing)
 
 ---
 
