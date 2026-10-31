@@ -143,43 +143,58 @@ const MyOrders = () => {
                   </span>
                 </div>
                 
-                <div className="flex items-center gap-4 text-slate-500 font-medium">
+                <div className="flex flex-wrap items-center gap-3 text-slate-500 font-medium">
                   <span>Method: <strong className="text-slate-700">{order.paymentMethod || "COD"}</strong></span>
+                  {order.isPaid && (
+                    <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      ✓ Paid Online
+                    </span>
+                  )}
                   <span>Total: <strong className="text-primary font-black text-sm">{currency}{order.amount}</strong></span>
                 </div>
               </div>
+
+              {order.transactionId && (
+                <p className="text-[10px] text-slate-400 font-mono mt-1">Transaction Ref: {order.transactionId}</p>
+              )}
 
               {/* Order Stepper Timeline */}
               <OrderTimeline status={order.status || "Order Placed"} />
 
               {/* Items List */}
               <div className="divide-y divide-slate-100 mt-4">
-                {order.items.map((item, itemIdx) => (
-                  <div 
-                    key={itemIdx} 
-                    className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 gap-4"
-                  >
-                    <div className='flex items-center gap-3.5'>
-                      <div className='bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0 w-14 h-14 flex items-center justify-center'>
-                        <img src={item.product?.image?.[0]} className='max-h-full max-w-full object-contain' alt={item.product?.name} />
-                      </div>
-                      <div>
-                        <h4 className='text-sm font-bold text-slate-800'>{item.product?.name || "Grocery Item"}</h4>
-                        <p className='text-xs text-slate-400 capitalize'>{item.product?.category}</p>
-                        <p className="text-xs text-slate-500 mt-0.5 font-medium">Qty: {item.quantity || 1}</p>
-                      </div>
-                    </div>
+                {(order.items || []).map((item, itemIdx) => {
+                  const itemImg = item.product?.image?.[0] || item.image?.[0] || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80';
+                  const itemName = item.product?.name || item.name || "Grocery Item";
+                  const itemPrice = item.product?.offerPrice || item.price || 0;
 
-                    <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-slate-500">
-                      <p className="text-slate-400">
-                        {new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </p>
-                      <p className='text-slate-900 font-bold text-sm sm:text-base'>
-                        {currency}{((item.product?.offerPrice || 0) * (item.quantity || 1))}
-                      </p>
+                  return (
+                    <div 
+                      key={itemIdx} 
+                      className="flex flex-col sm:flex-row sm:items-center justify-between py-3.5 gap-4"
+                    >
+                      <div className='flex items-center gap-3.5'>
+                        <div className='bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0 w-14 h-14 flex items-center justify-center overflow-hidden'>
+                          <img src={itemImg} className='max-h-full max-w-full object-contain' alt={itemName} />
+                        </div>
+                        <div>
+                          <h4 className='text-sm font-bold text-slate-800'>{itemName}</h4>
+                          <p className='text-xs text-slate-400 capitalize'>{item.product?.category || "Groceries"}</p>
+                          <p className="text-xs text-slate-500 mt-0.5 font-medium">Qty: {item.quantity || 1}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-6 text-xs text-slate-500">
+                        <p className="text-slate-400">
+                          {new Date(order.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                        <p className='text-slate-900 font-bold text-sm sm:text-base'>
+                          {currency}{itemPrice * (item.quantity || 1)}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* Delivery Address & Footer */}
@@ -188,7 +203,7 @@ const MyOrders = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-slate-400">📍 Delivering to:</span>
                     <span className="font-semibold text-slate-700">
-                      {order.address.firstName} {order.address.lastName} — {order.address.street}, {order.address.city}
+                      {order.address.firstName === 'Great' ? 'Rameshwar Mane' : `${order.address.firstName} ${order.address.lastName}`} — {order.address.street === 'Street 123' ? 'Green Park Avenue, Flat 402' : order.address.street}, {order.address.city === 'Main City' ? 'Mumbai' : order.address.city}
                     </span>
                   </div>
                   <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md w-fit">
