@@ -32,9 +32,25 @@ export const loginSeller = asyncHandler(async (req, res) => {
     });
 });
 
-// Seller isAuth : GET /api/seller/is-auth (Protected by authSeller)
+// Seller isAuth : GET /api/seller/is-auth
 export const isSellerAuth = asyncHandler(async (req, res) => {
-    return res.json({ success: true, isSeller: true });
+    const { sellerToken } = req.cookies || {};
+    if (!sellerToken) {
+        return res.json({ success: true, isSeller: false });
+    }
+
+    try {
+        const secret = process.env.JWT_SECRET || 'greencart_jwt_secret';
+        const expectedEmail = process.env.SELLER_EMAIL || 'admin@greencart.com';
+        const tokenDecode = jwt.verify(sellerToken, secret);
+
+        if (tokenDecode && (tokenDecode.email === expectedEmail || tokenDecode.role === 'seller' || tokenDecode.role === 'admin')) {
+            return res.json({ success: true, isSeller: true, seller: tokenDecode });
+        }
+        return res.json({ success: true, isSeller: false });
+    } catch {
+        return res.json({ success: true, isSeller: false });
+    }
 });
 
 // Logout Seller : GET /api/seller/logout

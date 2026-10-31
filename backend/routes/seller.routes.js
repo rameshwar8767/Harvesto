@@ -6,7 +6,7 @@ import { authRateLimiter } from '../middlewares/security.middleware.js';
 const sellerRouter = express.Router();
 
 sellerRouter.post('/login', authRateLimiter, loginSeller);
-sellerRouter.get('/is-auth', authSeller, isSellerAuth);
+sellerRouter.get('/is-auth', isSellerAuth);
 sellerRouter.get('/logout', logoutSeller);
 
 export default sellerRouter;

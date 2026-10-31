@@ -89,17 +89,24 @@ export const loginUser = asyncHandler(async (req, res) => {
 });
 
 
-//chek Auth : /api/user/is-auth
-
+// Check Auth : /api/user/is-auth
 export const isAuth = asyncHandler(async (req, res) => {
-    try {
-        const {userId } = req.body;
-        const user = await User.findById(userId).select("-password");
-        return res.json({ success: true, isAuth:!!user, user });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: "Server error" });
+    const { token } = req.cookies || {};
+    if (!token) {
+        return res.json({ success: true, isAuth: false, user: null });
     }
-})
+    try {
+        const secret = process.env.JWT_SECRET || 'greencart_jwt_secret';
+        const tokenDecode = jwt.verify(token, secret);
+        if (!tokenDecode || !tokenDecode.id) {
+            return res.json({ success: true, isAuth: false, user: null });
+        }
+        const user = await User.findById(tokenDecode.id).select('-password').lean();
+        return res.json({ success: true, isAuth: !!user, user });
+    } catch {
+        return res.json({ success: true, isAuth: false, user: null });
+    }
+});
 
 //logout User : /api/user/logout
 
