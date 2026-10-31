@@ -1,0 +1,19 @@
+{
+  "name": "Harvesto — Farm Fresh Groceries",
+  "short_name": "Harvesto",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "description": "Daily farm-fresh organic groceries, fruits, vegetables, and pantry staples delivered in 15 minutes.",
+  "categories": ["shopping", "food", "groceries"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

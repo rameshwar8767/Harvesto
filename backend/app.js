@@ -5,6 +5,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose';
 import connectDB from './configs/db.js';
 import apiRouter from './routes/index.js';
 import { securityHeaders, sanitizeInput } from './middlewares/security.middleware.js';
@@ -37,9 +38,43 @@ app.use(cors({
     credentials: true,
 }));
 
-// Health check endpoint
+// Health check & liveness endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({
+        status: 'ok',
+        service: 'Harvesto API',
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString(),
+    });
+});
+
+// Production diagnostics & system metrics endpoint
+app.get('/api/health/metrics', (req, res) => {
+    const memory = process.memoryUsage();
+    const dbStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
+    const dbState = dbStates[mongoose.connection.readyState] || 'unknown';
+
+    res.json({
+        status: dbState === 'connected' ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString(),
+        uptimeSeconds: Math.floor(process.uptime()),
+        database: {
+            status: dbState,
+            host: mongoose.connection.host || 'localhost',
+            name: mongoose.connection.name || 'greencart',
+        },
+        memory: {
+            rssMB: (memory.rss / (1024 * 1024)).toFixed(2),
+            heapUsedMB: (memory.heapUsed / (1024 * 1024)).toFixed(2),
+            heapTotalMB: (memory.heapTotal / (1024 * 1024)).toFixed(2),
+        },
+        process: {
+            nodeVersion: process.version,
+            platform: process.platform,
+            pid: process.pid,
+            environment: process.env.NODE_ENV || 'development',
+        },
+    });
 });
 
 app.get('/', (req, res) => {

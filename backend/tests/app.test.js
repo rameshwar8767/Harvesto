@@ -23,6 +23,26 @@ describe('Express API Core Routes', () => {
         app.handle(req, res);
     });
 
+    test('GET /api/health/metrics returns memory, process, and database telemetry', (t, done) => {
+        const req = { method: 'GET', url: '/api/health/metrics', headers: {} };
+        const res = {
+            statusCode: 200,
+            headers: {},
+            setHeader(k, v) { this.headers[k.toLowerCase()] = v; },
+            getHeader(k) { return this.headers[k.toLowerCase()]; },
+            removeHeader(k) { delete this.headers[k.toLowerCase()]; },
+            status(code) { this.statusCode = code; return this; },
+            json(body) {
+                assert.strictEqual(this.statusCode, 200);
+                assert.ok(body.memory && body.memory.rssMB);
+                assert.ok(body.process && body.process.nodeVersion);
+                assert.ok(body.database && body.database.status);
+                done();
+            },
+        };
+        app.handle(req, res);
+    });
+
     test('GET / responds with welcome banner string', (t, done) => {
         const req = { method: 'GET', url: '/', headers: {} };
         const res = {
@@ -42,4 +62,3 @@ describe('Express API Core Routes', () => {
     });
 
 });
-
