@@ -165,6 +165,89 @@ const SAMPLE_PRODUCTS = [
         image: ["https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80"],
         description: ["100% Sharbati whole wheat grains", "Unbleached with intact bran and germ", "Yields super soft, puffed rotis"],
         inStock: true,
+        stock: 35,
+    },
+
+    // Mithai & Sweets
+    {
+        name: "Silver Leaf Kaju Katli 250g",
+        category: "mithai",
+        price: 320,
+        offerPrice: 289,
+        image: ["https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=600&q=80"],
+        description: ["Diamond-cut premium sweet crafted from ground Goan cashews", "Adorned with pure vegetarian silver foil (Vark)", "Traditional Indian festive celebration delicacy"],
+        inStock: true,
+        stock: 25,
+    },
+    {
+        name: "Royal Desi Ghee Gulab Jamun 500g",
+        category: "mithai",
+        price: 240,
+        offerPrice: 210,
+        image: ["https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80"],
+        description: ["Melt-in-mouth fried mawa dumplings soaked in cardamom rose syrup", "Fried slowly in 100% pure cow desi ghee", "Served warm for royal dessert experience"],
+        inStock: true,
+        stock: 20,
+    },
+
+    // Cakes & Pastries
+    {
+        name: "Belgian Chocolate Truffle Cake 500g",
+        category: "cakes",
+        price: 499,
+        offerPrice: 429,
+        image: ["https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=600&q=80"],
+        description: ["Rich dark Belgian ganache layered on moist chocolate sponge", "Handcrafted by master artisanal pastry chefs", "Ideal centerpiece for birthdays and special moments"],
+        inStock: true,
+        stock: 14,
+    },
+
+    // Smart Electronics
+    {
+        name: "Harvesto Pro Wireless Earbuds ANC",
+        category: "electronics",
+        price: 2499,
+        offerPrice: 1699,
+        image: ["https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=600&q=80"],
+        description: ["Active Noise Cancellation (ANC 32dB) with Environmental Mic", "32-hour extended battery playtime with USB-C quick charge", "IPX5 sweat-proof resistance for fitness"],
+        inStock: true,
+        stock: 15,
+    },
+
+    // Mobiles & Gadgets
+    {
+        name: "Harvesto Neo 5G (8GB RAM, 128GB)",
+        category: "mobiles",
+        price: 14999,
+        offerPrice: 12499,
+        image: ["https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=600&q=80"],
+        description: ["6.67-inch FHD+ 120Hz Super AMOLED Display", "50MP AI Triple Camera with Optical Image Stabilization", "5000mAh battery with 67W Turbo Flash Charging"],
+        inStock: true,
+        stock: 6,
+    },
+
+    // Clothes & Fashion
+    {
+        name: "100% Organic Cotton Crew T-Shirt",
+        category: "clothes",
+        price: 699,
+        offerPrice: 449,
+        image: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"],
+        description: ["180 GSM combed organic cotton with super soft bio-wash", "Pre-shrunk fabric retains fit wash after wash", "Breathable, lightweight all-day comfort"],
+        inStock: true,
+        stock: 30,
+    },
+
+    // Daily Uses & Home Essentials
+    {
+        name: "Ariel Matic Liquid Detergent 1L",
+        category: "daily uses",
+        price: 240,
+        offerPrice: 215,
+        image: ["https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80"],
+        description: ["Deep stain removal enzyme formula for washing machines", "Dissolves quickly without leaving powdery white residue on clothes", "Fresh floral fragrance that lasts up to 7 days"],
+        inStock: true,
+        stock: 25,
     },
 ];
 

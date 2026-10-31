@@ -9,8 +9,7 @@ const ProductCategory = () => {
     const { category } = useParams();
 
     const searchCategory = categories.find((item) => item.path.toLowerCase() === category?.toLowerCase());
-    const filterProducts = products.filter((product) => product.category.toLowerCase() === category?.toLowerCase());
-    const inStockProducts = filterProducts.filter(p => p.inStock);
+    const filterProducts = products.filter((product) => product.category?.toLowerCase() === category?.toLowerCase());
 
     return (
         <div className='mt-8 mb-20 flex flex-col'>
@@ -29,7 +28,7 @@ const ProductCategory = () => {
                         {searchCategory ? searchCategory.text : category}
                     </h1>
                     <p className='text-xs sm:text-sm text-slate-500 mt-1'>
-                        Showing {inStockProducts.length} farm-fresh items in this category
+                        Showing {filterProducts.length} items in this aisle
                     </p>
                 </div>
 
@@ -52,9 +51,9 @@ const ProductCategory = () => {
             </div>
 
             {/* Products Grid */}
-            {inStockProducts.length > 0 ? (
+            {filterProducts.length > 0 ? (
                 <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4 md:gap-6'> 
-                    {inStockProducts.map((product) => (
+                    {filterProducts.map((product) => (
                         <ProductCard key={product._id} product={product} />
                     ))}
                 </div>

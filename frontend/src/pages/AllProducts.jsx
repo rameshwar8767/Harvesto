@@ -7,8 +7,8 @@ const PRICE_RANGES = [
     { id: 'all', label: 'All Prices' },
     { id: 'under-50', label: 'Under ₹50', test: (p) => p.offerPrice < 50 },
     { id: '50-100', label: '₹50 - ₹100', test: (p) => p.offerPrice >= 50 && p.offerPrice <= 100 },
-    { id: '100-200', label: '₹100 - ₹200', test: (p) => p.offerPrice > 100 && p.offerPrice <= 200 },
-    { id: 'above-200', label: 'Over ₹200', test: (p) => p.offerPrice > 200 },
+    { id: '100-500', label: '₹100 - ₹500', test: (p) => p.offerPrice > 100 && p.offerPrice <= 500 },
+    { id: 'above-500', label: 'Over ₹500', test: (p) => p.offerPrice > 500 },
 ];
 
 const AllProducts = () => {
