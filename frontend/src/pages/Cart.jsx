@@ -2,17 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { assets, dummyAddress } from '../assets/assets';
 import { toast } from 'react-hot-toast';
-import { orderApi } from '../api';
+import { orderApi, addressApi } from '../api';
 
 const Cart = () => {
     const [showAddress, setShowAddress] = useState(false);
     const { products, currency, cartItems, setCartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount } = useAppContext();
 
     const [cartArray, setCartArray] = useState([]);
-    const [address] = useState(dummyAddress);
+    const [addressList, setAddressList] = useState(dummyAddress);
     const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
     const [paymentMethod, setPaymentMethod] = useState("COD");
     const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            try {
+                const res = await addressApi.getAddresses().catch(() => null);
+                const localSaved = JSON.parse(localStorage.getItem('greencart_saved_addresses') || '[]');
+                let combined = [];
+
+                if (res && res.success && Array.isArray(res.addresses) && res.addresses.length > 0) {
+                    combined = [...res.addresses, ...localSaved];
+                } else if (localSaved.length > 0) {
+                    combined = [...localSaved, ...dummyAddress];
+                } else {
+                    combined = dummyAddress;
+                }
+
+                setAddressList(combined);
+                if (combined.length > 0) {
+                    setSelectedAddress(combined[0]);
+                }
+            } catch {
+                setAddressList(dummyAddress);
+                setSelectedAddress(dummyAddress[0]);
+            }
+        };
+
+        fetchAddresses();
+    }, []);
 
     useEffect(() => {
         if (products && products.length > 0 && cartItems) {
@@ -193,15 +221,15 @@ const Cart = () => {
                         </p>
 
                         {showAddress && (
-                            <div className="absolute top-full left-0 right-0 z-30 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl p-2 text-xs divide-y divide-slate-100">
-                                {address.map((addr, index) => (
+                            <div className="absolute top-full left-0 right-0 z-30 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl p-2 text-xs divide-y divide-slate-100 max-h-56 overflow-y-auto">
+                                {addressList.map((addr, index) => (
                                     <div 
-                                        key={index} 
+                                        key={addr._id || index} 
                                         onClick={() => { setSelectedAddress(addr); setShowAddress(false); }} 
-                                        className="p-2 hover:bg-emerald-50 rounded-lg cursor-pointer"
+                                        className={`p-2 hover:bg-emerald-50 rounded-lg cursor-pointer transition ${selectedAddress === addr ? 'bg-emerald-50/70 font-semibold' : ''}`}
                                     >
                                         <p className="font-bold text-slate-800">{addr.firstName} {addr.lastName}</p>
-                                        <p className="text-slate-500">{addr.street}, {addr.city}</p>
+                                        <p className="text-slate-500 text-[11px] truncate">{addr.street}, {addr.city}</p>
                                     </div>
                                 ))}
                                 <button 

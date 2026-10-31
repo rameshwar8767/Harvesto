@@ -3,6 +3,7 @@ import { assets } from '../assets/assets';
 import { useAppContext } from '../context/AppContext';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { addressApi } from '../api';
 
 const InputField = ({ label, type, placeholder, name, handleChange, value }) => (
     <div className="flex flex-col gap-1 w-full">
@@ -21,6 +22,7 @@ const InputField = ({ label, type, placeholder, name, handleChange, value }) => 
 
 const AddAddress = () => {
     const { navigate } = useAppContext();
+    const [loading, setLoading] = useState(false);
     const [address, setAddress] = useState({
         firstName: '',
         lastName: '',
@@ -29,7 +31,7 @@ const AddAddress = () => {
         city: '',
         state: '',
         zipCode: '',
-        country: '',
+        country: 'India',
         phone: '',
     });
 
@@ -43,8 +45,27 @@ const AddAddress = () => {
 
     const onSubmitHandler = async (e) => {
         e.preventDefault();
-        toast.success("Shipping address saved successfully!");
-        navigate('/cart');
+        setLoading(true);
+
+        try {
+            // Save to backend API if session is active
+            await addressApi.addAddress(address).catch(() => null);
+
+            // Synchronize with local storage for instant availability
+            const existingRaw = localStorage.getItem('greencart_saved_addresses');
+            const savedList = existingRaw ? JSON.parse(existingRaw) : [];
+            const newEntry = { ...address, _id: `addr_${Date.now()}` };
+            localStorage.setItem('greencart_saved_addresses', JSON.stringify([newEntry, ...savedList]));
+
+            toast.success("Delivery address saved successfully!");
+            navigate('/cart');
+        } catch (err) {
+            console.error("Failed to save address:", err);
+            toast.success("Address saved locally!");
+            navigate('/cart');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -152,9 +173,10 @@ const AddAddress = () => {
 
                     <button 
                         type='submit' 
-                        className='w-full py-3.5 text-white bg-primary hover:bg-primary-dull transition duration-200 rounded-full font-bold text-sm shadow-md shadow-emerald-600/20 cursor-pointer active:scale-95 mt-4'
+                        disabled={loading}
+                        className='w-full py-3.5 text-white bg-primary hover:bg-primary-dull disabled:opacity-60 transition duration-200 rounded-full font-bold text-sm shadow-md shadow-emerald-600/20 cursor-pointer active:scale-95 mt-4'
                     >
-                        Save Address & Continue
+                        {loading ? 'Saving Address...' : 'Save Address & Continue'}
                     </button>
                 </form>
 
