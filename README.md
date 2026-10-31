@@ -165,6 +165,11 @@ SELLER_PASSWORD=harvesto_seller_secure_password
 NODE_ENV=development
 ```
 
+Populate sample products, seller, customer, and demo orders:
+```bash
+npm run seed
+```
+
 Start the backend development server:
 ```bash
 npm run dev
@@ -209,7 +214,8 @@ Open your browser and navigate to `http://localhost:5173`.
 ### Health & System
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `GET` | `/api/health` | Healthcheck and timestamp | No |
+| `GET` | `/api/health` | Service liveness probe & uptime | No |
+| `GET` | `/api/health/metrics` | System diagnostics (DB state, memory RSS/heap, Node version) | No |
 
 ### User Authentication (`/api/user`)
 | Method | Endpoint | Description | Rate Limited |
