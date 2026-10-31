@@ -5,8 +5,7 @@ import { assets } from '../assets/assets';
 import ProductCard from '../components/ProductCard';
 
 const ProductDetails = () => {
-    const { products, currency, navigate, addToCart } = useAppContext();
-
+  const { products, currency, navigate, addToCart } = useAppContext();
   const { id } = useParams();
 
   const [relatedProducts, setRelatedProducts] = useState([]);
@@ -71,7 +70,7 @@ const ProductDetails = () => {
                 <img
                   key={i}
                   className="md:w-4 w-3.5"
-                  src={i < 4 ? assets.search_icon : assets.star_dull_icon}
+                  src={i < 4 ? assets.star_icon : assets.star_dull_icon}
                   alt="rating"
                 />
               ))}
@@ -93,14 +92,13 @@ const ProductDetails = () => {
 
           <div className="flex items-center mt-10 gap-4 text-base">
             <button
-              onClick={(product) =>addToCart(product._id )}
+              onClick={() => addToCart(product._id)}
               className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition-colors duration-200"
             >
               Add to Cart
             </button>
             <button
-              onClick={(product) => {
-                console.log('Added to cart:', product);
+              onClick={() => {
                 addToCart(product._id);
                 navigate("/cart");
               }}
@@ -121,16 +119,16 @@ const ProductDetails = () => {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6 mt-6 w-full">
           {relatedProducts
-            .filter((product) => product.inStock)
-            .map((product, index) => (
-              <ProductCard key={index} product={product} />
+            .filter((p) => p.inStock)
+            .map((p) => (
+              <ProductCard key={p._id} product={p} />
             ))}
         </div>
 
         <button
           onClick={() => {
             navigate('/products');
-            scrollTo(0, 0);
+            window.scrollTo(0, 0);
           }}
           className="mx-auto cursor-pointer px-12 my-16 py-2.5 border rounded text-primary hover:bg-primary hover:text-white transition-colors duration-200"
         >

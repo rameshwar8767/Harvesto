@@ -1,40 +1,38 @@
-import React from 'react'
-import { useAppContext } from '../context/AppContext'
-import { useParams } from 'react-router-dom'
-import { categories } from '../assets/assets'
-import ProductCard from '../components/ProductCard'
+import React from 'react';
+import { useAppContext } from '../context/AppContext';
+import { useParams } from 'react-router-dom';
+import { categories } from '../assets/assets';
+import ProductCard from '../components/ProductCard';
 
 const ProductCategory = () => {
-    const {products} = useAppContext()
-    const {category} = useParams()
+    const { products } = useAppContext();
+    const { category } = useParams();
 
-    const searchCategory = categories.find((item) => item.path.toLowerCase() === category)
+    const searchCategory = categories.find((item) => item.path.toLowerCase() === category?.toLowerCase());
+    const filterProducts = products.filter((product) => product.category.toLowerCase() === category?.toLowerCase());
 
-    const filterProducts = products.filter((product)=>product.category.toLowerCase()===category)
-  return (
-    <div className='mt-16 flex flex-col'>
-      {searchCategory && (
-        <div className='flex flex-col items-end w-max'>
-            <p className='text-2xl font-medium'>{searchCategory.text.toUpperCase()}</p>
-            <div className='w-16 h-0.5 bg-primary rounded-full'></div>
-        </div>
-        
-      )}
-      {filterProducts.length > 0 ? (
-        <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8 md:gap-6 lg:gap-8' > 
-            {
-                filterProducts.map((product)=>(
-                       <ProductCard key={product._id} product={product}/>
-                ))
-            }
-        </div>
-      ): (
-        <div className='flex items-center justify-center h-[60vh'>
-            <p className='font-medium text-primary text-2xl'>No products found in this category</p>
-        </div>
-      )}
-    </div>
-  )
-}
+    return (
+        <div className='mt-12 flex flex-col mb-16'>
+            <div className='flex flex-col items-start w-max mb-6'>
+                <p className='text-2xl md:text-3xl font-semibold text-gray-800'>
+                    {searchCategory ? searchCategory.text : category}
+                </p>
+                <div className='w-16 h-1 bg-primary rounded-full mt-1.5'></div>
+            </div>
 
-export default ProductCategory
+            {filterProducts.length > 0 ? (
+                <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6'> 
+                    {filterProducts.map((product) => (
+                        <ProductCard key={product._id} product={product} />
+                    ))}
+                </div>
+            ) : (
+                <div className='flex flex-col items-center justify-center min-h-[50vh] text-center'>
+                    <p className='font-medium text-gray-500 text-xl'>No products found in this category.</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default ProductCategory;
