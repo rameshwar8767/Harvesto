@@ -75,3 +75,4 @@ describe('Frontend API Client Architecture', () => {
     });
 
 });
+
