@@ -300,3 +300,4 @@ export async function up(db) {
 export async function down(db) {
     console.log("  -> Rolling back migration 002 (skipping destructive drop of user accounts)...");
 }
+

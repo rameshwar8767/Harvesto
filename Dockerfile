@@ -46,3 +46,4 @@ EXPOSE 5000
 
 WORKDIR /app/backend
 CMD ["node", "server.js"]
+

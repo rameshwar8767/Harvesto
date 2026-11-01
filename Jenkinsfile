@@ -17,6 +17,7 @@ pipeline {
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
         GITHUB_CREDENTIALS = credentials('github-credentials')
         GIT_BRANCH = 'main'
+        GIT_REPO = 'https://github.com/rameshwar8767/Harvesto.git'
     }
 
     stages {

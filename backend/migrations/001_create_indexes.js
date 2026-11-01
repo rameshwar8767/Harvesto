@@ -37,3 +37,4 @@ export async function down(db) {
         // Ignore if index doesn't exist
     }
 }
+
