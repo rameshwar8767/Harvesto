@@ -62,3 +62,28 @@ terraform destroy -auto-approve
 | **Public IPv4 Addresses** | 2x IPv4 (EC2 + NAT EIP) | $0.010 / hr ($0.005/ip) | $0.04 | $0.24 |
 | **Total Estimated Cost** | **Full Stack Active** | **~$0.267 / hour** | **~$1.07 USD (~₹90)** | **~$6.41 USD (~₹535)** |
 
+
+---
+
+## 🗄️ Database Migrations on EKS
+
+To apply database migrations on the EKS cluster:
+
+1. Create the database secret in Kubernetes:
+```bash
+kubectl create secret generic harvesto-secrets \
+  --from-literal=MONGODB_URI="mongodb+srv://<user>:<password>@cluster.mongodb.net/greencart?retryWrites=true&w=majority" \
+  --from-literal=JWT_SECRET="your-production-jwt-secret-key"
+```
+
+2. Trigger the database migration Job:
+```bash
+kubectl apply -f ../kubernetes/migration-job.yaml
+kubectl wait --for=condition=complete job/harvesto-db-migration --timeout=120s
+```
+
+3. Deploy or update the Harvesto application:
+```bash
+kubectl apply -f ../kubernetes/deployment.yaml
+kubectl apply -f ../kubernetes/service.yaml
+```

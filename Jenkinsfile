@@ -1,21 +1,28 @@
-@Library('Shared')
+@Library('Shared') _
 
 pipeline {
     agent any
 
+    options {
+        timeout(time: 45, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+        disableConcurrentBuilds()
+        ansiColor('xterm')
+    }
+
     environment {
         DOCKER_HUB_USERNAME = 'rameshwarrm'
-        DOCKER_IMAGE_NAME = 'rameshwarrm/heristo-app'
-        DOCKER_MIGRATION_IMAGE_NAME = 'rameshwarrm/heristo-migration'
-        DOCKER_IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKER_IMAGE_NAME = 'rameshwarrm/harvesto-app'
+        DOCKER_MIGRATION_IMAGE_NAME = 'rameshwarrm/harvesto-migration'
+        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
         GITHUB_CREDENTIALS = credentials('github-credentials')
         GIT_BRANCH = 'main'
     }
 
     stages {
         stage('Cleanup Workspace') {
-            steps{
-                script{
+            steps {
+                script {
                     clean_ws()
                 }
             }
@@ -24,7 +31,15 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 script {
-                    clone("https://github.com/rameshwar8767/Harvesto.git","main")
+                    clone("https://github.com/rameshwar8767/Harvesto.git", env.GIT_BRANCH)
+                }
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                script {
+                    run_tests()
                 }
             }
         }
@@ -59,18 +74,9 @@ pipeline {
             }
         }
 
-        stage('Run Unit Tests') {
-            steps {
-                script {
-                    run_tests()
-                }
-            }
-        }
-
         stage('Security Scan with Trivy') {
             steps {
                 script {
-                    // Create directory for results
                     trivy_scan()
                 }
             }
@@ -104,20 +110,30 @@ pipeline {
             }
         }
 
-        // Add this new stage
         stage('Update Kubernetes Manifests') {
             steps {
                 script {
-                    update_k8s_manifests{
+                    update_k8s_manifests(
                         imageTag: env.DOCKER_IMAGE_TAG,
                         manifestsPath: 'kubernetes',
                         gitCredentials: 'github-credentials',
                         gitUserName: 'Jenkins CI',
                         gitUserEmail: 'manerameshwar909@gmail.com'
-                    }
+                    )
                 }
             }
         }
+    }
 
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "✔ Harvesto CI/CD Pipeline succeeded! Image tag ${env.DOCKER_IMAGE_TAG} published and manifests updated."
+        }
+        failure {
+            echo "❌ Harvesto CI/CD Pipeline failed! Check stage logs for troubleshooting."
+        }
     }
 }

@@ -74,6 +74,10 @@ const MainBanner = () => {
             <img 
               src={assets.organic_vegitable_image} 
               alt="Harvesto Fresh Vegetables" 
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80";
+              }}
               className="w-48 sm:w-60 md:w-72 object-contain group-hover:scale-105 transition-transform duration-500 drop-shadow-2xl" 
             />
             {/* Floating Highlights */}

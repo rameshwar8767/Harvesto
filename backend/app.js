@@ -4,6 +4,8 @@ dotenv.config();
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import connectDB from './configs/db.js';
@@ -17,11 +19,16 @@ const PORT = process.env.PORT || 5000;
 app.use(securityHeaders);
 app.use(sanitizeInput);
 
-// Allow local frontend origins
+// Allow frontend origins
+const configuredOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
+    : [];
+
 const allowedOrigins = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    ...configuredOrigins,
 ];
 
 app.use(express.json());
@@ -29,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
@@ -38,7 +45,19 @@ app.use(cors({
     credentials: true,
 }));
 
-// Health check & liveness endpoint
+// Centralized API Router
+app.use('/api', apiRouter);
+
+// Serve static frontend assets in production if built
+if (process.env.NODE_ENV === 'production') {
+    const distCandidate1 = path.resolve('../frontend/dist');
+    const distCandidate2 = path.resolve('./frontend/dist');
+    const effectiveDistPath = fs.existsSync(distCandidate1) ? distCandidate1 : (fs.existsSync(distCandidate2) ? distCandidate2 : null);
+
+    if (effectiveDistPath) {
+        app.use(express.static(effectiveDistPath));
+    }
+}
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',

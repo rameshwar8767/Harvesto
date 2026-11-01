@@ -9,12 +9,35 @@ const Cart = () => {
     const [showAddress, setShowAddress] = useState(false);
     const { products, currency, cartItems, setCartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, decrementStock } = useAppContext();
 
+    const defaultSafeAddress = {
+        _id: "addr_default_1",
+        firstName: "Rameshwar",
+        lastName: "Mane",
+        email: "rameshwar@harvesto.com",
+        street: "Green Park Avenue, Flat 402",
+        city: "Mumbai",
+        state: "Maharashtra",
+        zipCode: "400001",
+        zipcode: "400001",
+        country: "India",
+        phone: "+91 98765 43210"
+    };
+
+    const isGSAddress = (a) =>
+        !a ||
+        (typeof a.firstName === 'string' && a.firstName.toLowerCase().includes('great')) ||
+        (typeof a.lastName === 'string' && a.lastName.toLowerCase().includes('stack')) ||
+        (typeof a.street === 'string' && a.street.includes('Street 123')) ||
+        (typeof a.email === 'string' && a.email.toLowerCase().includes('greatstack'));
+
     const [cartArray, setCartArray] = useState([]);
     const [addressList, setAddressList] = useState(dummyAddress);
     const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
     const [paymentMethod, setPaymentMethod] = useState("COD");
     const [submitting, setSubmitting] = useState(false);
     const [showPaymentModal, setShowPaymentModal] = useState(false);
+
+    const activeAddress = selectedAddress && !isGSAddress(selectedAddress) ? selectedAddress : defaultSafeAddress;
 
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -119,16 +142,16 @@ const Cart = () => {
             })),
             amount: totalAmount,
             address: {
-                firstName: selectedAddress.firstName || "Customer",
-                lastName: selectedAddress.lastName || "",
-                email: selectedAddress.email || "",
-                street: selectedAddress.street || "",
-                city: selectedAddress.city || "",
-                state: selectedAddress.state || "",
-                zipCode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
-                zipcode: String(selectedAddress.zipCode || selectedAddress.zipcode || "400001"),
-                country: selectedAddress.country || "India",
-                phone: selectedAddress.phone || "",
+                firstName: activeAddress.firstName || "Rameshwar",
+                lastName: activeAddress.lastName || "Mane",
+                email: activeAddress.email || "rameshwar@harvesto.com",
+                street: activeAddress.street || "Green Park Avenue, Flat 402",
+                city: activeAddress.city || "Mumbai",
+                state: activeAddress.state || "Maharashtra",
+                zipCode: String(activeAddress.zipCode || activeAddress.zipcode || "400001"),
+                zipcode: String(activeAddress.zipCode || activeAddress.zipcode || "400001"),
+                country: activeAddress.country || "India",
+                phone: activeAddress.phone || "+91 98765 43210",
             },
             paymentMethod: paymentMethodOverride || paymentMethod,
             isPaid,
@@ -332,10 +355,10 @@ const Cart = () => {
 
                     <div className="relative bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600">
                         <p className="font-semibold text-slate-800">
-                            {selectedAddress ? `${selectedAddress.firstName} ${selectedAddress.lastName}` : "No address selected"}
+                            {activeAddress ? `${activeAddress.firstName} ${activeAddress.lastName}` : "No address selected"}
                         </p>
                         <p className="mt-0.5 line-clamp-2">
-                            {selectedAddress ? `${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} - ${selectedAddress.zipCode || selectedAddress.zipcode}` : "Please add a shipping address"}
+                            {activeAddress ? `${activeAddress.street}, ${activeAddress.city}, ${activeAddress.state} - ${activeAddress.zipCode || activeAddress.zipcode}` : "Please add a shipping address"}
                         </p>
 
                         {showAddress && (
