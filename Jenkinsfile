@@ -4,6 +4,7 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_HUB_USERNAME = 'rameshwarrm'
         DOCKER_IMAGE_NAME = 'rameshwarrm/heristo-app'
         DOCKER_MIGRATION_IMAGE_NAME = 'rameshwarrm/heristo-migration'
         DOCKER_IMAGE_TAG = "${BUILD_NUMBER}"
