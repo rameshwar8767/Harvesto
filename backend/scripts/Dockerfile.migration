@@ -41,4 +41,3 @@ COPY backend/configs ./backend/configs
 USER node
 
 ENTRYPOINT ["node", "backend/scripts/migrate.js", "up"]
-
