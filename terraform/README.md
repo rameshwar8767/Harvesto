@@ -61,3 +61,4 @@ terraform destroy -auto-approve
 | **EC2 Storage** | 20 GB gp3 root disk | ~$0.002 / hr | ~$0.01 | ~$0.05 |
 | **Public IPv4 Addresses** | 2x IPv4 (EC2 + NAT EIP) | $0.010 / hr ($0.005/ip) | $0.04 | $0.24 |
 | **Total Estimated Cost** | **Full Stack Active** | **~$0.267 / hour** | **~$1.07 USD (~₹90)** | **~$6.41 USD (~₹535)** |
+
