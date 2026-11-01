@@ -1,0 +1,45 @@
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data, such as
+# password, private keys, and other credentials.
+*.tfvars
+*.tfvars.json
+
+# Ignore override files as they are usually used to override resources locally and so
+# are not meant to be committed
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Include override files you do wish to add to version control using negated pattern
+# !example_override.tf
+
+# Include tfplan files to prevent accidental leakage of plans and credentials
+*.tfplan
+*tfplan*
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# SSH keys and sensitive credentials
+*.pem
+*.key
+terra-key
+id_rsa
+id_rsa.pub
+
+# OS generated files
+.DS_Store
+Thumbs.db
+

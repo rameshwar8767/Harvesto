@@ -1,7 +1,3 @@
-# data "aws_ami" "os_image" {
-
-# }
-
 resource "aws_key_pair" "my_secret_key" {
   key_name   = "terra-key"
   public_key = file("terra-key.pub")
@@ -13,7 +9,7 @@ resource "aws_default_vpc" "default_vpc" {
 
 resource "aws_security_group" "allow_user_to_connect" {
   name        = "allow TLS"
-  description = "Allow uer to connect"
+  description = "Allow user to connect"
   vpc_id      = aws_default_vpc.default_vpc.id
 
   // ssh allows
@@ -72,15 +68,14 @@ resource "aws_security_group" "allow_user_to_connect" {
   tags = {
     Name = "my_security"
   }
-
 }
 
-resource "aws_ec2_instance" "my_instance" {
-  ami             = "ami-0c7632fb77f35db43"
-  instance_type   = var.instance_type
-  key_name        = aws_key_pair.my_secret_key.key_name
-  security_groups = [aws_security_group.my_security.allow_user_to_connect.name]
-  user_data       = file("${path.module}/install_tools.sh")
+resource "aws_instance" "my_instance" {
+  ami                    = "ami-0c7632fb77f35db43"
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.my_secret_key.key_name
+  vpc_security_group_ids = [aws_security_group.allow_user_to_connect.id]
+  user_data              = file("${path.module}/install_tools.sh")
 
   tags = {
     Name = "Jenkins-Automate"
