@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -euo pipefail
 
@@ -17,7 +16,7 @@ apt-get install -y \
 install -d -m 0755 /etc/apt/keyrings
 
 wget -qO /etc/apt/keyrings/jenkins-keyring.asc \
-  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
 
 echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
   > /etc/apt/sources.list.d/jenkins.list

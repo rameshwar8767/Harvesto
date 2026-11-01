@@ -12,7 +12,7 @@ resource "aws_security_group" "allow_user_to_connect" {
   description = "Allow user to connect"
   vpc_id      = aws_default_vpc.default_vpc.id
 
-  // ssh allows
+  // SSH allow
   ingress {
     description = "port 22 allow"
     from_port   = 22
@@ -21,11 +21,12 @@ resource "aws_security_group" "allow_user_to_connect" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  egress {
-    description = "all outgoing traffic"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+  // Jenkins Web UI
+  ingress {
+    description = "port 8080 allow Jenkins"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -47,7 +48,7 @@ resource "aws_security_group" "allow_user_to_connect" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  // Http
+  // HTTP
   ingress {
     description = "port 80 allow"
     from_port   = 80
@@ -56,12 +57,20 @@ resource "aws_security_group" "allow_user_to_connect" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  // Https allows
+  // HTTPS
   ingress {
     description = "port 443 allow"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "all outgoing traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -71,7 +80,7 @@ resource "aws_security_group" "allow_user_to_connect" {
 }
 
 resource "aws_instance" "my_instance" {
-  ami                    = "ami-0c7632fb77f35db43"
+  ami                    = var.ami_id
   instance_type          = var.instance_type
   key_name               = aws_key_pair.my_secret_key.key_name
   vpc_security_group_ids = [aws_security_group.allow_user_to_connect.id]
