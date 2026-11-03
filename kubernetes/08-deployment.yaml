@@ -13,32 +13,27 @@ spec:
   template:
     metadata:
       labels:
-        app: harvesto-app
+        app: harvesto
     spec:
       containers:
-        - name: harvesto-app
+        - name: harvesto
           image: rameshwarrm/harvesto-app:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
               name: http
+          envFrom:
+            - configMapRef:
+              name: harvesto-config
+            - secretRef:
+              name: harvesto-secrets
+
           env:
-            - name: PORT
-              value: "5000"
-            - name: NODE_ENV
-              value: "production"
-            - name: MONGODB_URI
-              valueFrom:
-                secretKeyRef:
-                  name: harvesto-secrets
-                  key: MONGODB_URI
-                  optional: true
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: harvesto-secrets
                   key: JWT_SECRET
-                  optional: true
           resources:
             requests:
               cpu: 100m
@@ -46,6 +41,12 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /
+              port: 5000
+            failureThreshold: 30
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /api/health
