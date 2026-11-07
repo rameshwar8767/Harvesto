@@ -15,4 +15,13 @@ spec:
       - harvesto.letsdeployit.com
       secretName: harvesto-tls-secret  
     rules:
-    - 
+    - host: harvesto.letsdeployit.com
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: harvesto-service
+              port:
+                number: 80
