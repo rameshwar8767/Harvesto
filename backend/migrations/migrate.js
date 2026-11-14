@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/greencart";
-const MIGRATIONS_DIR = path.resolve(__dirname, "../migrations");
+const MIGRATIONS_DIR = __dirname;
 
 // Schema for tracking applied migrations
 const migrationSchema = new mongoose.Schema({
@@ -27,7 +27,7 @@ async function getMigrationFiles() {
         return [];
     }
     const files = fs.readdirSync(MIGRATIONS_DIR)
-        .filter((file) => file.endsWith(".js"))
+        .filter((file) => file.endsWith(".js") && file !== "migrate.js")
         .sort();
     return files;
 }

@@ -66,7 +66,7 @@ pipeline {
                             docker_build(
                                 imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
                                 imageTag: env.DOCKER_IMAGE_TAG,
-                                dockerfile: 'backend/scripts/Dockerfile.migration',
+                                dockerfile: 'backend/Dockerfile.migration',
                                 context: '.'
                             )
                         }
