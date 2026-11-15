@@ -39,6 +39,7 @@
 
 | Component | Visual Proof & Real-World Console Snapshot | Description |
 | :--- | :--- | :--- |
+| **Live Deployed Application** | ![Harvesto Live Web App](frontend/public/app.png) | Harvesto Farm-Fresh E-Commerce Storefront running live on AWS EKS via internet-facing AWS Load Balancer. |
 | **End-to-End Architecture** | ![Cloud Architecture](frontend/public/architecture.png) | High-level distributed architecture across AWS VPC, EKS, CI/CD, and Monitoring tiers. |
 | **Jenkins CI Automation** | ![Jenkins Pipeline](frontend/public/jenkins1.png) | Automated Declarative Pipeline: Checkout ➔ Unit Tests ➔ Trivy Filesystem Scan ➔ Parallel Docker Builds ➔ Trivy Image Scan ➔ Push ➔ Git Manifest Update. |
 | **Argo CD GitOps** | ![Argo CD GitOps](frontend/public/argocd.png) | Declarative GitOps reconciliation syncing Kubernetes manifests with zero-downtime rolling updates. |
