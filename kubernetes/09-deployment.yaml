@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: harvesto
-          image: rameshwarrm/harvesto-app:73
+          image: rameshwarrm/harvesto-app:74
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
