@@ -1,6 +1,6 @@
 # Harvesto — Fresh Groceries Harvested For You 🌿🛒
 
-> Full-stack MERN e-commerce application delivering farm-fresh vegetables, Grocery, organic fruits, dairy, and bakery staples with express 15-minute dispatch.
+> Full-stack MERN e-commerce application delivering farm-fresh vegetables, Grocery, organic fruits, dairy, and bakery staples with express 10-minute dispatch.
 
 ![Harvesto Banner](frontend/public/d.png)
 
