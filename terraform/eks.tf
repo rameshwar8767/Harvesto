@@ -13,15 +13,21 @@ module "eks" {
   # Core EKS addons
   addons = {
     coredns = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     kube-proxy = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
 
     vpc-cni = {
-      most_recent = true
+      most_recent                 = true
+      resolve_conflicts_on_create = "OVERWRITE"
+      resolve_conflicts_on_update = "OVERWRITE"
     }
   }
 
