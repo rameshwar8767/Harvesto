@@ -35,6 +35,18 @@ module "eks" {
   subnet_ids               = module.vpc.private_subnets
   control_plane_subnet_ids = module.vpc.intra_subnets
 
+  # Allow inbound traffic from ELB and internet to NodePort range (30000-32767)
+  node_security_group_additional_rules = {
+    ingress_nodeports = {
+      description = "NodePort service range for ELB and application access"
+      protocol    = "tcp"
+      from_port   = 30000
+      to_port     = 32767
+      type        = "ingress"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+
   eks_managed_node_groups = {
     "harvesto-nodes" = {
       min_size     = 2
