@@ -1,24 +1,105 @@
 # Harvesto — Fresh Groceries Harvested For You 🌿🛒
 
-> Full-stack MERN e-commerce application delivering farm-fresh vegetables, organic groceries, fruits, dairy, and bakery staples with express 10-15 minute delivery.
+> Production-grade cloud-native full-stack MERN e-commerce platform with automated GitOps, CI/CD, and SRE Observability on Amazon Web Services (AWS EKS).
 
-![Harvesto Banner](frontend/public/d.png)
+[![AWS EKS](https://img.shields.io/badge/AWS-EKS%20v1.31-FF9900?logo=amazon-aws&logoColor=white)](https://aws.amazon.com/eks/)
+[![Terraform](https://img.shields.io/badge/IaC-Terraform-7B42BC?logo=terraform&logoColor=white)](https://www.terraform.io/)
+[![Jenkins](https://img.shields.io/badge/CI-Jenkins-D24939?logo=jenkins&logoColor=white)](https://www.jenkins.io/)
+[![Docker](https://img.shields.io/badge/Containers-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Argo CD](https://img.shields.io/badge/GitOps-Argo%20CD-EF7B4D?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
+[![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-E6522C?logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Observability-Grafana-F46800?logo=grafana&logoColor=white)](https://grafana.com/)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+
+---
+
+## 🏛️ Cloud & DevOps Architecture
+
+![Harvesto Cloud Architecture](frontend/public/architecture.png)
 
 ---
 
 ## 📋 Table of Contents
-1. [Overview & Architecture](#-overview--architecture)
-2. [Tech Stack](#-tech-stack)
-3. [Folder Structure](#-folder-structure)
-4. [Getting Started](#-getting-started)
-   - [Prerequisites](#prerequisites)
-   - [Backend Setup](#1-backend-setup)
-   - [Frontend Setup](#2-frontend-setup)
-5. [Environment Variables](#-environment-variables)
-6. [API Reference](#-api-reference)
-7. [Security & Performance Engineering](#-security--performance-engineering)
-8. [Testing & Quality Verification](#-testing--quality-verification)
-9. [Production Deployment Guide](#-production-deployment-guide)
+1. [Enterprise Cloud Showcase](#-enterprise-cloud--devops-showcase)
+2. [Documentation Hub](#-enterprise-documentation-hub)
+3. [Step-by-Step Deployment Quickstart](#-step-by-step-deployment-quickstart)
+4. [Overview & System Architecture](#-overview--architecture)
+5. [Tech Stack](#-tech-stack)
+6. [Folder Structure](#-folder-structure)
+7. [Getting Started (Local Development)](#-getting-started)
+8. [Environment Variables](#-environment-variables)
+9. [API Reference](#-api-reference)
+10. [Security & Performance Engineering](#-security--performance-engineering)
+11. [Testing & Quality Verification](#-testing--quality-verification)
+12. [License](#-license)
+
+---
+
+## 📸 Enterprise Cloud & DevOps Showcase
+
+| Component | Visual Proof & Real-World Console Snapshot | Description |
+| :--- | :--- | :--- |
+| **End-to-End Architecture** | ![Cloud Architecture](frontend/public/architecture.png) | High-level distributed architecture across AWS VPC, EKS, CI/CD, and Monitoring tiers. |
+| **Jenkins CI Automation** | ![Jenkins Pipeline](frontend/public/jenkins1.png) | Automated Declarative Pipeline: Checkout ➔ Unit Tests ➔ Trivy Filesystem Scan ➔ Parallel Docker Builds ➔ Trivy Image Scan ➔ Push ➔ Git Manifest Update. |
+| **Argo CD GitOps** | ![Argo CD GitOps](frontend/public/argocd.png) | Declarative GitOps reconciliation syncing Kubernetes manifests with zero-downtime rolling updates. |
+| **Grafana Observability** | ![Grafana Dashboard](frontend/public/grafana.png) | Live Kubernetes cluster, namespace (Pods), and worker node telemetry powered by Prometheus. |
+| **Prometheus Metrics** | ![Prometheus UI](frontend/public/prometheus.png) | Real-time target scraping across cAdvisor, Node Exporter, and application health metrics. |
+
+---
+
+## 📚 Enterprise Documentation Hub
+
+The project repository includes deep-dive, industry-standard documentation located in the [`docs/`](docs/) directory:
+
+* 📑 **[docs/README.md](docs/README.md)**: Master documentation index and quick reference.
+* 🏛️ **[docs/01-ARCHITECTURE.md](docs/01-ARCHITECTURE.md)**: Comprehensive system design, AWS VPC 3-tier subnets (Public/Private/Intra), EKS cluster topology, and port mapping matrix.
+* 🛠️ **[docs/02-TROUBLESHOOTING-AND-CHALLENGES.md](docs/02-TROUBLESHOOTING-AND-CHALLENGES.md)**: **8 real-world production post-mortems** (EKS node deadlocks, Groovy regex errors, Docker logout race conditions, 256KB CRD limits, Express 5 router fixes, and Terraform VPC cleanup hooks).
+* 🚀 **[docs/03-STEP-BY-STEP-DEPLOYMENT-GUIDE.md](docs/03-STEP-BY-STEP-DEPLOYMENT-GUIDE.md)**: Hands-on guide with exact CLI commands for deploying Terraform, Jenkins, Argo CD, and Kube-Prometheus-Stack.
+* 🧪 **[docs/04-TESTING-AND-VERIFICATION.md](docs/04-TESTING-AND-VERIFICATION.md)**: Verification runbook covering Node.js unit tests, Trivy security gates, live telemetry checks, HPA autoscaling load tests, and chaos engineering.
+* 🛡️ **[docs/05-PRODUCTION-BEST-PRACTICES-AND-RUNBOOK.md](docs/05-PRODUCTION-BEST-PRACTICES-AND-RUNBOOK.md)**: SRE standards, non-root containers (`USER node`), Spot instance cost reduction (70%+), single NAT gateway patterns, and MongoDB disaster recovery playbooks.
+
+---
+
+## 🚀 Step-by-Step Deployment Quickstart
+
+Follow these concise steps to deploy the entire cloud infrastructure and GitOps pipeline. For detailed instructions, refer to **[docs/03-STEP-BY-STEP-DEPLOYMENT-GUIDE.md](docs/03-STEP-BY-STEP-DEPLOYMENT-GUIDE.md)**.
+
+### 1. Provision Cloud Infrastructure (Terraform)
+```powershell
+cd terraform
+terraform init
+terraform plan -out=tfplan
+terraform apply "tfplan"
+```
+
+### 2. Connect Kubectl to EKS Cluster
+```powershell
+aws eks update-kubeconfig --region ap-south-1 --name harvesto-eks-cluster
+kubectl get nodes -o wide
+```
+
+### 3. Deploy Argo CD (GitOps)
+```powershell
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --server-side --force-conflicts
+kubectl patch svc argocd-server -n argocd -p '{\"spec\": {\"type\": \"LoadBalancer\"}}'
+```
+
+### 4. Deploy Prometheus & Grafana (Observability)
+```powershell
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl create namespace monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --set grafana.service.type=LoadBalancer --set grafana.adminPassword="admin123" --set prometheus.service.type=LoadBalancer
+```
+
+### 5. Access All Live Cloud Endpoints
+```powershell
+kubectl get svc -A --field-selector spec.type=LoadBalancer
+```
+
+---
 
 ---
 
