@@ -30,10 +30,15 @@ output "jenkins_url" {
 
 output "eks_managed_node_group_private_ips" {
   description = "Private IPs of the EKS node group instances in private subnets"
-  value       = data.aws_instances.eks_nodes.private_ips
+  value       = try(data.aws_instances.eks_nodes.private_ips, [])
 }
 
 output "eks_managed_node_group_public_ips" {
   description = "Public IPs of the EKS node group instances (empty since worker nodes are deployed in private subnets)"
-  value       = data.aws_instances.eks_nodes.public_ips
+  value       = try(data.aws_instances.eks_nodes.public_ips, [])
+}
+
+output "configure_kubectl_command" {
+  description = "Command to configure kubectl to connect to the EKS cluster"
+  value       = "aws eks update-kubeconfig --region ${local.region} --name ${module.eks.cluster_name}"
 }

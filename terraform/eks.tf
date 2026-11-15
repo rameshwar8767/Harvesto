@@ -1,4 +1,3 @@
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
@@ -11,7 +10,7 @@ module "eks" {
   # Give the IAM identity creating the cluster admin access
   enable_cluster_creator_admin_permissions = true
 
-  # EKS addons
+  # Core EKS addons
   addons = {
     coredns = {
       most_recent = true
@@ -31,7 +30,7 @@ module "eks" {
   control_plane_subnet_ids = module.vpc.intra_subnets
 
   eks_managed_node_groups = {
-    "my-demo-ng" = {
+    "harvesto-nodes" = {
       min_size     = 2
       max_size     = 3
       desired_size = 2
@@ -44,16 +43,15 @@ module "eks" {
       use_custom_launch_template = false
 
       tags = {
-        Name        = "my-demo-ng"
-        Environment = "dev"
-        ExtraTag    = "e-commerce-app"
+        Name        = "harvesto-worker-node"
+        Environment = var.my_environment
+        Project     = "Harvesto"
       }
     }
   }
 
   tags = local.tags
 }
-
 
 data "aws_instances" "eks_nodes" {
   instance_tags = {

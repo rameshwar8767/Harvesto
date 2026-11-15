@@ -1,11 +1,11 @@
 locals {
   region   = var.aws_region
-  name     = "my-eks-cluster"
+  name     = var.cluster_name
   vpc_cidr = "10.0.0.0/16"
 
   azs = [
-    "ap-south-1a",
-    "ap-south-1b"
+    "${var.aws_region}a",
+    "${var.aws_region}b"
   ]
 
   public_subnets = [
@@ -24,7 +24,9 @@ locals {
   ]
 
   tags = {
-    example = "my-eks-cluster"
+    Project     = "Harvesto"
+    Environment = var.my_environment
+    ManagedBy   = "Terraform"
   }
 }
 

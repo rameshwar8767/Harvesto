@@ -1,7 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# Update system and install core packages
+export DEBIAN_FRONTEND=noninteractive
+
+echo "==> Updating package repositories..."
 apt-get update -y
 apt-get install -y \
   fontconfig \
@@ -10,58 +12,55 @@ apt-get install -y \
   gnupg \
   ca-certificates \
   curl \
-  snapd
+  unzip \
+  git \
+  apt-transport-https
 
-# Jenkins installation
+# 1. Jenkins Installation
+echo "==> Installing Jenkins..."
 install -d -m 0755 /etc/apt/keyrings
-
-wget -qO /etc/apt/keyrings/jenkins-keyring.asc \
-  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
-
-echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" \
-  > /etc/apt/sources.list.d/jenkins.list
+wget -qO /etc/apt/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/" > /etc/apt/sources.list.d/jenkins.list
 
 apt-get update -y
 apt-get install -y jenkins
 
-# Docker installation
+# 2. Docker Installation
+echo "==> Installing Docker..."
 apt-get install -y docker.io
-
 systemctl enable --now docker
-
-# Allow Jenkins to use Docker
 usermod -aG docker jenkins
 
-# Jenkins installation and startup
-systemctl enable jenkins
-systemctl start jenkins
-
-# Trivy installation
+# 3. Trivy Security Scanner Installation
+echo "==> Installing Trivy..."
 install -d -m 0755 /usr/share/keyrings
-
-wget -qO - \
-  https://aquasecurity.github.io/trivy-repo/deb/public.key \
-  | gpg --dearmor \
-  > /usr/share/keyrings/trivy.gpg
-
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor > /usr/share/keyrings/trivy.gpg
 chmod 0644 /usr/share/keyrings/trivy.gpg
-
-echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" \
-  > /etc/apt/sources.list.d/trivy.list
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" > /etc/apt/sources.list.d/trivy.list
 
 apt-get update -y
 apt-get install -y trivy
 
-# AWS CLI installation
-snap install aws-cli --classic
+# 4. Kubectl Installation (Direct official binary - fast & reliable)
+echo "==> Installing kubectl..."
+KUBECTL_VERSION="v1.31.0"
+curl -sLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+chmod +x kubectl
+mv kubectl /usr/local/bin/
 
-# Helm installation
-snap install helm --classic
+# 5. Helm Installation (Direct official script)
+echo "==> Installing Helm..."
+curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-# kubectl installation
-snap install kubectl --classic
+# 6. AWS CLI v2 Installation
+echo "==> Installing AWS CLI v2..."
+curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip -q awscliv2.zip
+./aws/install --update
+rm -rf awscliv2.zip aws
 
-# Restart Jenkins to apply Docker group membership
+# 7. Restart Jenkins to apply Docker group permissions
+systemctl enable jenkins
 systemctl restart jenkins
 
-echo "EC2 setup completed successfully"
+echo "==> Harvesto DevOps Tools installation completed successfully!"
