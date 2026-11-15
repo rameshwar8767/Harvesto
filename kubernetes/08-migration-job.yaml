@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migration
+  namespace: harvesto
+  labels:
+    app: harvesto-migration
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: harvesto-migration
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: migration
+          image: rameshwarrm/harvesto-migration:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: harvesto-config
+            - secretRef:
+                name: harvesto-secrets
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi

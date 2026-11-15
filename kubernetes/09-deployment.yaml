@@ -1,12 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: harvesto
   namespace: harvesto
-
+  labels:
+    app: harvesto
 spec:
   replicas: 2
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: harvesto
@@ -24,16 +30,9 @@ spec:
               name: http
           envFrom:
             - configMapRef:
-              name: harvesto-config
+                name: harvesto-config
             - secretRef:
-              name: harvesto-secrets
-
-          env:
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: harvesto-secrets
-                  key: JWT_SECRET
+                name: harvesto-secrets
           resources:
             requests:
               cpu: 100m
@@ -43,10 +42,10 @@ spec:
               memory: 512Mi
           startupProbe:
             httpGet:
-              path: /
+              path: /api/health
               port: 5000
             failureThreshold: 30
-            periodSeconds: 10
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /api/health
@@ -64,4 +63,3 @@ spec:
             timeoutSeconds: 2
             successThreshold: 1
             failureThreshold: 2
-

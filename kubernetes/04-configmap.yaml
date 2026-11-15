@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
-
 metadata:
   name: harvesto-config
   namespace: harvesto
-
+  labels:
+    app: harvesto
 data:
-  MONGODB_URI: "mongodb://mongodb-service:27017/easyshop"
+  MONGODB_URI: "mongodb://mongodb-service.harvesto.svc.cluster.local:27017/harvesto"
   NODE_ENV: "production"
-  
+  PORT: "5000"

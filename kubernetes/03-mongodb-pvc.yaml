@@ -1,13 +1,14 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
-
 metadata:
   name: mongodb-pvc
   namespace: harvesto
-
+  labels:
+    app: mongodb
 spec:
+  storageClassName: manual
   accessModes:
-    -ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi

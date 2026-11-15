@@ -78,12 +78,12 @@ kubectl create secret generic harvesto-secrets \
 
 2. Trigger the database migration Job:
 ```bash
-kubectl apply -f ../kubernetes/migration-job.yaml
-kubectl wait --for=condition=complete job/harvesto-db-migration --timeout=120s
+kubectl apply -f ../kubernetes/08-migration-job.yaml
+kubectl wait --for=condition=complete job/db-migration -n harvesto --timeout=120s
 ```
 
-3. Deploy or update the Harvesto application:
+3. Deploy or update the Harvesto application and external service:
 ```bash
-kubectl apply -f ../kubernetes/deployment.yaml
-kubectl apply -f ../kubernetes/service.yaml
+kubectl apply -f ../kubernetes/09-deployment.yaml
+kubectl apply -f ../kubernetes/10-service.yaml
 ```
