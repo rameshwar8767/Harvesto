@@ -48,14 +48,14 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                // Automatically auto-detects package.json / pom.xml / pytest / go.mod
+                // Auto-detects package.json / pom.xml / pytest / go.mod
                 run_tests(ignoreFailures: false)
             }
         }
 
         stage('Security Scan - Filesystem') {
             steps {
-                // Scans codebase dependencies before building Docker images
+                // Scans workspace dependencies before building Docker images
                 trivy_scan(
                     scanType: 'fs',
                     target: '.',
@@ -152,6 +152,7 @@ pipeline {
             steps {
                 update_k8s_manifests(
                     imageTag: env.DOCKER_IMAGE_TAG,
+                    images: [env.DOCKER_IMAGE_NAME, env.DOCKER_MIGRATION_IMAGE_NAME],
                     manifestsPath: 'kubernetes',
                     gitRepoUrl: env.GIT_REPO,
                     gitBranch: env.GIT_BRANCH,
@@ -166,7 +167,6 @@ pipeline {
 
     post {
         always {
-            // Generate and archive build summary reports
             generate_reports(
                 projectName: env.APP_NAME,
                 imageName: env.DOCKER_IMAGE_NAME,
@@ -177,7 +177,6 @@ pipeline {
                     'Git Branch'     : env.GIT_BRANCH
                 ]
             )
-            // Final safe workspace cleanup
             clean_ws(notFailBuild: true)
         }
         success {
