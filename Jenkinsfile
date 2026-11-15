@@ -11,37 +11,58 @@ pipeline {
     }
 
     environment {
-        DOCKER_HUB_USERNAME = 'rameshwarrm'
-        DOCKER_IMAGE_NAME = 'rameshwarrm/harvesto-app'
+        // Application Metadata
+        APP_NAME                    = 'Harvesto'
+        DOCKER_IMAGE_NAME           = 'rameshwarrm/harvesto-app'
         DOCKER_MIGRATION_IMAGE_NAME = 'rameshwarrm/harvesto-migration'
-        DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
-        GITHUB_CREDENTIALS = credentials('github-credentials')
-        GIT_BRANCH = 'main'
-        GIT_REPO = 'https://github.com/rameshwar8767/Harvesto.git'
+        DOCKER_IMAGE_TAG            = "${env.BUILD_NUMBER ?: 'latest'}"
+
+        // Git Configuration
+        GIT_REPO                    = 'https://github.com/rameshwar8767/Harvesto.git'
+        GIT_BRANCH                  = 'main'
+
+        // Jenkins Credential IDs
+        DOCKER_CREDENTIALS_ID       = 'docker-hub-credentials'
+        GITHUB_CREDENTIALS_ID       = 'github-credentials'
     }
 
     stages {
-        stage('Cleanup Workspace') {
+        stage('Initialize & Clean') {
             steps {
-                script {
-                    clean_ws()
-                }
+                hello('Rameshwar')
+                clean_ws(notFailBuild: true)
             }
         }
 
         stage('Clone Repository') {
             steps {
-                script {
-                    clone("https://github.com/rameshwar8767/Harvesto.git", env.GIT_BRANCH)
-                }
+                clone(
+                    url: env.GIT_REPO,
+                    branch: env.GIT_BRANCH,
+                    credentialsId: env.GITHUB_CREDENTIALS_ID,
+                    shallow: true,
+                    depth: 1
+                )
             }
         }
 
-        stage('Run Unit Tests') {
+        stage('Run Tests') {
             steps {
-                script {
-                    run_tests()
-                }
+                // Automatically auto-detects package.json / pom.xml / pytest / go.mod
+                run_tests(ignoreFailures: false)
+            }
+        }
+
+        stage('Security Scan - Filesystem') {
+            steps {
+                // Scans codebase dependencies before building Docker images
+                trivy_scan(
+                    scanType: 'fs',
+                    target: '.',
+                    severity: 'HIGH,CRITICAL',
+                    exitCode: 0,
+                    outputFile: 'trivy-fs-report.txt'
+                )
             }
         }
 
@@ -49,36 +70,54 @@ pipeline {
             parallel {
                 stage('Build Main App Image') {
                     steps {
-                        script {
-                            docker_build(
-                                imageName: env.DOCKER_IMAGE_NAME,
-                                imageTag: env.DOCKER_IMAGE_TAG,
-                                dockerfile: 'Dockerfile',
-                                context: '.'
-                            )
-                        }
+                        docker_build(
+                            imageName: env.DOCKER_IMAGE_NAME,
+                            imageTag: env.DOCKER_IMAGE_TAG,
+                            dockerfile: 'Dockerfile',
+                            context: '.',
+                            tagLatest: true
+                        )
                     }
                 }
 
                 stage('Build Migration Image') {
                     steps {
-                        script {
-                            docker_build(
-                                imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
-                                imageTag: env.DOCKER_IMAGE_TAG,
-                                dockerfile: 'backend/Dockerfile.migration',
-                                context: '.'
-                            )
-                        }
+                        docker_build(
+                            imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
+                            imageTag: env.DOCKER_IMAGE_TAG,
+                            dockerfile: 'backend/Dockerfile.migration',
+                            context: '.',
+                            tagLatest: true
+                        )
                     }
                 }
             }
         }
 
-        stage('Security Scan with Trivy') {
-            steps {
-                script {
-                    trivy_scan()
+        stage('Security Scan - Docker Images') {
+            parallel {
+                stage('Scan App Image') {
+                    steps {
+                        trivy_scan(
+                            scanType: 'image',
+                            target: "${env.DOCKER_IMAGE_NAME}:${env.DOCKER_IMAGE_TAG}",
+                            severity: 'CRITICAL',
+                            exitCode: 0,
+                            outputFile: 'trivy-app-image-report.txt'
+                        )
+                    }
+                }
+
+                stage('Scan Migration Image') {
+                    steps {
+                        trivy_scan(
+                            scanType: 'image',
+                            target: "${env.DOCKER_MIGRATION_IMAGE_NAME}:${env.DOCKER_IMAGE_TAG}",
+                            severity: 'CRITICAL',
+                            exitCode: 0,
+                            outputFile: 'trivy-migration-image-report.txt'
+                        )
+                    }
                 }
             }
         }
@@ -87,25 +126,23 @@ pipeline {
             parallel {
                 stage('Push Main App Image') {
                     steps {
-                        script {
-                            docker_push(
-                                imageName: env.DOCKER_IMAGE_NAME,
-                                imageTag: env.DOCKER_IMAGE_TAG,
-                                credentials: 'docker-hub-credentials'
-                            )
-                        }
+                        docker_push(
+                            imageName: env.DOCKER_IMAGE_NAME,
+                            imageTag: env.DOCKER_IMAGE_TAG,
+                            credentialsId: env.DOCKER_CREDENTIALS_ID,
+                            pushLatest: true
+                        )
                     }
                 }
 
                 stage('Push Migration Image') {
                     steps {
-                        script {
-                            docker_push(
-                                imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
-                                imageTag: env.DOCKER_IMAGE_TAG,
-                                credentials: 'docker-hub-credentials'
-                            )
-                        }
+                        docker_push(
+                            imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
+                            imageTag: env.DOCKER_IMAGE_TAG,
+                            credentialsId: env.DOCKER_CREDENTIALS_ID,
+                            pushLatest: true
+                        )
                     }
                 }
             }
@@ -113,28 +150,41 @@ pipeline {
 
         stage('Update Kubernetes Manifests') {
             steps {
-                script {
-                    update_k8s_manifests(
-                        imageTag: env.DOCKER_IMAGE_TAG,
-                        manifestsPath: 'kubernetes',
-                        gitCredentials: 'github-credentials',
-                        gitUserName: 'Jenkins CI',
-                        gitUserEmail: 'manerameshwar909@gmail.com'
-                    )
-                }
+                update_k8s_manifests(
+                    imageTag: env.DOCKER_IMAGE_TAG,
+                    manifestsPath: 'kubernetes',
+                    gitRepoUrl: env.GIT_REPO,
+                    gitBranch: env.GIT_BRANCH,
+                    gitCredentials: env.GITHUB_CREDENTIALS_ID,
+                    gitUserName: 'Jenkins CI',
+                    gitUserEmail: 'manerameshwar909@gmail.com',
+                    commitMessage: "chore(k8s): update Harvesto image tags to ${env.DOCKER_IMAGE_TAG} [ci skip]"
+                )
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // Generate and archive build summary reports
+            generate_reports(
+                projectName: env.APP_NAME,
+                imageName: env.DOCKER_IMAGE_NAME,
+                imageTag: env.DOCKER_IMAGE_TAG,
+                extraInfo: [
+                    'Migration Image': env.DOCKER_MIGRATION_IMAGE_NAME,
+                    'Git Repository' : env.GIT_REPO,
+                    'Git Branch'     : env.GIT_BRANCH
+                ]
+            )
+            // Final safe workspace cleanup
+            clean_ws(notFailBuild: true)
         }
         success {
-            echo "✔ Harvesto CI/CD Pipeline succeeded! Image tag ${env.DOCKER_IMAGE_TAG} published and manifests updated."
+            echo "✔ ${env.APP_NAME} CI/CD Pipeline succeeded! Image tag ${env.DOCKER_IMAGE_TAG} published & K8s manifests updated."
         }
         failure {
-            echo "❌ Harvesto CI/CD Pipeline failed! Check stage logs for troubleshooting."
+            echo "❌ ${env.APP_NAME} CI/CD Pipeline failed! Please check stage console logs for diagnostics."
         }
     }
 }
