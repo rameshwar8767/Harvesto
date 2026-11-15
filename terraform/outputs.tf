@@ -42,3 +42,8 @@ output "configure_kubectl_command" {
   description = "Command to configure kubectl to connect to the EKS cluster"
   value       = "aws eks update-kubeconfig --region ${local.region} --name ${module.eks.cluster_name}"
 }
+
+output "get_loadbalancer_endpoints_command" {
+  description = "Command to view all created public AWS LoadBalancer URLs"
+  value       = "kubectl get svc -A --field-selector spec.type=LoadBalancer"
+}
