@@ -3,6 +3,9 @@ kind: Job
 metadata:
   name: db-migration
   namespace: harvesto
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
   labels:
     app: harvesto-migration
 spec:
