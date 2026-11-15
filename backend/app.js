@@ -35,29 +35,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true,
     credentials: true,
 }));
 
-// Centralized API Router
-app.use('/api', apiRouter);
-
-// Serve static frontend assets in production if built
+// Serve static frontend assets in production if built (before API/error handlers)
+let effectiveDistPath = null;
 if (process.env.NODE_ENV === 'production') {
     const distCandidate1 = path.resolve('../frontend/dist');
     const distCandidate2 = path.resolve('./frontend/dist');
-    const effectiveDistPath = fs.existsSync(distCandidate1) ? distCandidate1 : (fs.existsSync(distCandidate2) ? distCandidate2 : null);
+    effectiveDistPath = fs.existsSync(distCandidate1) ? distCandidate1 : (fs.existsSync(distCandidate2) ? distCandidate2 : null);
 
     if (effectiveDistPath) {
         app.use(express.static(effectiveDistPath));
     }
 }
+
+// Centralized API Router
+app.use('/api', apiRouter);
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -96,12 +91,19 @@ app.get('/api/health/metrics', (req, res) => {
     });
 });
 
-app.get('/', (req, res) => {
-    res.send('GreenCart API is running');
-});
-
-// Centralized API Router
-app.use('/api', apiRouter);
+// SPA Fallback for non-API client routes in production
+if (effectiveDistPath) {
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api')) {
+            return next();
+        }
+        res.sendFile(path.join(effectiveDistPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('GreenCart API is running');
+    });
+}
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {
