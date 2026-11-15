@@ -16,7 +16,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: migration
-          image: rameshwarrm/harvesto-migration:63
+          image: rameshwarrm/harvesto-migration:64
           imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
