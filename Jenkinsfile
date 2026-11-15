@@ -123,28 +123,22 @@ pipeline {
         }
 
         stage('Push Docker Images') {
-            parallel {
-                stage('Push Main App Image') {
-                    steps {
-                        docker_push(
-                            imageName: env.DOCKER_IMAGE_NAME,
-                            imageTag: env.DOCKER_IMAGE_TAG,
-                            credentialsId: env.DOCKER_CREDENTIALS_ID,
-                            pushLatest: true
-                        )
-                    }
-                }
+            steps {
+                echo "==> Pushing Main Application Docker Image..."
+                docker_push(
+                    imageName: env.DOCKER_IMAGE_NAME,
+                    imageTag: env.DOCKER_IMAGE_TAG,
+                    credentialsId: env.DOCKER_CREDENTIALS_ID,
+                    pushLatest: true
+                )
 
-                stage('Push Migration Image') {
-                    steps {
-                        docker_push(
-                            imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
-                            imageTag: env.DOCKER_IMAGE_TAG,
-                            credentialsId: env.DOCKER_CREDENTIALS_ID,
-                            pushLatest: true
-                        )
-                    }
-                }
+                echo "==> Pushing Migration Docker Image..."
+                docker_push(
+                    imageName: env.DOCKER_MIGRATION_IMAGE_NAME,
+                    imageTag: env.DOCKER_IMAGE_TAG,
+                    credentialsId: env.DOCKER_CREDENTIALS_ID,
+                    pushLatest: true
+                )
             }
         }
 
